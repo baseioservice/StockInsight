@@ -20,7 +20,15 @@ st.markdown("""
 # Market status
 is_open, market_status = is_indian_market_open()
 status_color = "green" if is_open else "red"
-st.markdown(f"<h3 style='color: {status_color};'>Market Status: {market_status}</h3>", unsafe_allow_html=True)
+st.markdown(
+    f"""
+    <div style='background-color: {'#E8F5E9' if is_open else '#FFEBEE'}; padding: 10px; border-radius: 5px;'>
+        <h3 style='color: {status_color}; margin: 0;'>📊 {market_status}</h3>
+        {'' if is_open else '<p style="margin: 5px 0 0 0; color: #666;">Showing last available market data</p>'}
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # Stock input
 symbol = st.text_input("Enter Stock Symbol:", value="RELIANCE").upper()
@@ -28,15 +36,17 @@ symbol = st.text_input("Enter Stock Symbol:", value="RELIANCE").upper()
 if symbol:
     with st.spinner('Fetching data...'):
         hist_data, info, message = get_stock_data(symbol)
-        
+
         if message != "success":
             st.error(message)
         else:
             # Display summary table
             st.subheader("Stock Summary")
+            if not is_open:
+                st.info("Note: Data shown is from the last market close")
             summary_df = prepare_summary_data(info)
             st.table(summary_df)
-            
+
             # Download button for summary
             csv = summary_df.to_csv(index=False)
             st.download_button(
@@ -45,11 +55,11 @@ if symbol:
                 file_name=f"{symbol}_summary.csv",
                 mime="text/csv"
             )
-            
+
             # Interactive price chart
             st.subheader("Price History")
             fig = go.Figure()
-            
+
             fig.add_trace(
                 go.Candlestick(
                     x=hist_data.index,
@@ -60,7 +70,7 @@ if symbol:
                     name='OHLC'
                 )
             )
-            
+
             fig.update_layout(
                 title=f"{symbol} Stock Price",
                 yaxis_title="Price (₹)",
@@ -69,9 +79,9 @@ if symbol:
                 height=600,
                 xaxis_rangeslider_visible=False
             )
-            
+
             st.plotly_chart(fig, use_container_width=True)
-            
+
             # Download button for historical data
             csv_hist = hist_data.to_csv()
             st.download_button(
