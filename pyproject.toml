@@ -12,3 +12,5 @@ dependencies = [
     "trafilatura>=2.0.0",
     "yfinance>=0.2.54",
 ]
+[tool.poetry]
+package-mode = false
