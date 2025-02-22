@@ -359,12 +359,23 @@ if st.button("Generate Portfolio Snapshot", key="generate_snapshot"):
                 if 'Invalid Symbols' in summary and summary['Invalid Symbols']:
                     st.warning(f"Unable to fetch data for the following symbols: {', '.join(summary['Invalid Symbols'])}")
 
-                # Display portfolio table with sparklines
+                # Display portfolio table
                 st.subheader("Portfolio Details")
-
-                # Create sparkline plots for each stock
+                
+                # Drop the Trend column as we'll display it separately
+                display_df = portfolio_df.drop('Trend', axis=1)
+                
+                # Display the main dataframe
+                st.dataframe(
+                    display_df,
+                    hide_index=True
+                )
+                
+                # Display trends as separate small charts
+                st.subheader("Price Trends")
                 for index, row in portfolio_df.iterrows():
                     if row['Trend']:
+                        st.caption(f"{row['Symbol']} Trend")
                         fig = go.Figure()
                         fig.add_trace(go.Scatter(
                             y=row['Trend'],
@@ -377,31 +388,13 @@ if st.button("Generate Portfolio Snapshot", key="generate_snapshot"):
                         ))
                         fig.update_layout(
                             margin=dict(l=0, r=0, t=0, b=0),
-                            height=30,
-                            width=100,
+                            height=100,
                             paper_bgcolor='rgba(0,0,0,0)',
                             plot_bgcolor='rgba(0,0,0,0)',
                             xaxis=dict(showgrid=False, zeroline=False, visible=False),
                             yaxis=dict(showgrid=False, zeroline=False, visible=False)
                         )
-                        portfolio_df.at[index, 'Trend'] = fig
-
-                # Display the dataframe with sparklines
-                st.dataframe(
-                    portfolio_df,
-                    column_config={
-                        "Symbol": st.column_config.TextColumn("Symbol", width="medium"),
-                        "Trend": st.column_config.PlotColumn("Trend", width="small"),
-                        "Current Price": st.column_config.TextColumn("Current Price", width="medium"),
-                        "Change": st.column_config.TextColumn("Change", width="medium"),
-                        "Change %": st.column_config.TextColumn("Change %", width="medium"),
-                        "52W High": st.column_config.TextColumn("52W High", width="medium"),
-                        "52W Low": st.column_config.TextColumn("52W Low", width="medium"),
-                        "Distance from 52W High %": st.column_config.TextColumn("Distance from 52W High", width="medium"),
-                        "Distance from 52W Low %": st.column_config.TextColumn("Distance from 52W Low", width="medium")
-                    },
-                    hide_index=True
-                )
+                        st.plotly_chart(fig, use_container_width=True)
 
                 # Download button for portfolio data
                 csv = portfolio_df.drop('Trend', axis=1).to_csv(index=False)
