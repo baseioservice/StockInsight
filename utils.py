@@ -1,6 +1,7 @@
 import datetime
 import pytz
 import pandas as pd
+import numpy as np
 import yfinance as yf
 from typing import Tuple, Optional
 
@@ -38,6 +39,16 @@ def is_indian_market_open() -> Tuple[bool, str]:
 
     return True, "Market is open"
 
+def calculate_rsi(data: pd.Series, periods: int = 14) -> pd.Series:
+    """Calculate Relative Strength Index."""
+    delta = data.diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=periods).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=periods).mean()
+
+    rs = gain / loss
+    rsi = 100 - (100 / (1 + rs))
+    return rsi
+
 def get_stock_data(symbol: str) -> Tuple[Optional[pd.DataFrame], Optional[dict], str]:
     """Fetch stock data from Yahoo Finance."""
     try:
@@ -56,6 +67,15 @@ def get_stock_data(symbol: str) -> Tuple[Optional[pd.DataFrame], Optional[dict],
         hist = stock.history(period="1y")
         if hist.empty:
             return None, None, "No historical data available"
+
+        # Calculate technical indicators
+        # Moving averages
+        hist['MA20'] = hist['Close'].rolling(window=20).mean()
+        hist['MA50'] = hist['Close'].rolling(window=50).mean()
+        hist['MA200'] = hist['Close'].rolling(window=200).mean()
+
+        # RSI
+        hist['RSI'] = calculate_rsi(hist['Close'])
 
         return hist, info, "success"
 

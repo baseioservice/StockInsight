@@ -57,19 +57,28 @@ if symbol:
                 summary_df = prepare_summary_data(info)
                 st.table(summary_df)
 
-                # Download button for summary
-                csv = summary_df.to_csv(index=False)
-                st.download_button(
-                    label="Download Summary CSV",
-                    data=csv,
-                    file_name=f"{symbol}_summary.csv",
-                    mime="text/csv"
-                )
+                # Technical Indicators section
+                st.subheader("Technical Indicators")
+                col1, col2 = st.columns(2)
+
+                # Moving Average controls
+                with col1:
+                    st.subheader("Moving Averages")
+                    show_ma20 = st.checkbox("20-day MA", value=True)
+                    show_ma50 = st.checkbox("50-day MA", value=True)
+                    show_ma200 = st.checkbox("200-day MA")
+
+                # RSI controls
+                with col2:
+                    st.subheader("RSI")
+                    show_rsi = st.checkbox("Show RSI", value=True)
+                    rsi_period = st.slider("RSI Period", min_value=7, max_value=30, value=14)
 
                 # Interactive price chart
                 st.subheader("Price History")
                 fig = go.Figure()
 
+                # Main candlestick chart
                 fig.add_trace(
                     go.Candlestick(
                         x=hist_data.index,
@@ -80,6 +89,31 @@ if symbol:
                         name='OHLC'
                     )
                 )
+
+                # Add Moving Averages
+                if show_ma20:
+                    fig.add_trace(go.Scatter(
+                        x=hist_data.index,
+                        y=hist_data['MA20'],
+                        name='MA20',
+                        line=dict(color='blue', width=1)
+                    ))
+
+                if show_ma50:
+                    fig.add_trace(go.Scatter(
+                        x=hist_data.index,
+                        y=hist_data['MA50'],
+                        name='MA50',
+                        line=dict(color='orange', width=1)
+                    ))
+
+                if show_ma200:
+                    fig.add_trace(go.Scatter(
+                        x=hist_data.index,
+                        y=hist_data['MA200'],
+                        name='MA200',
+                        line=dict(color='red', width=1)
+                    ))
 
                 fig.update_layout(
                     title=f"{symbol} Stock Price",
@@ -92,14 +126,53 @@ if symbol:
 
                 st.plotly_chart(fig, use_container_width=True)
 
-                # Download button for historical data
-                csv_hist = hist_data.to_csv()
-                st.download_button(
-                    label="Download Historical Data CSV",
-                    data=csv_hist,
-                    file_name=f"{symbol}_historical.csv",
-                    mime="text/csv"
-                )
+                # RSI Chart
+                if show_rsi:
+                    rsi_fig = go.Figure()
+                    rsi_fig.add_trace(go.Scatter(
+                        x=hist_data.index,
+                        y=hist_data['RSI'],
+                        name='RSI',
+                        line=dict(color='purple', width=1)
+                    ))
+
+                    # Add overbought/oversold lines
+                    rsi_fig.add_hline(y=70, line_dash="dash", line_color="red", annotation_text="Overbought (70)")
+                    rsi_fig.add_hline(y=30, line_dash="dash", line_color="green", annotation_text="Oversold (30)")
+
+                    rsi_fig.update_layout(
+                        title="Relative Strength Index (RSI)",
+                        yaxis_title="RSI",
+                        xaxis_title="Date",
+                        template="plotly_white",
+                        height=300,
+                        yaxis=dict(range=[0, 100])
+                    )
+
+                    st.plotly_chart(rsi_fig, use_container_width=True)
+
+                # Download buttons
+                col1, col2 = st.columns(2)
+                with col1:
+                    # Download button for summary
+                    csv = summary_df.to_csv(index=False)
+                    st.download_button(
+                        label="Download Summary CSV",
+                        data=csv,
+                        file_name=f"{symbol}_summary.csv",
+                        mime="text/csv"
+                    )
+
+                with col2:
+                    # Download button for historical data
+                    csv_hist = hist_data.to_csv()
+                    st.download_button(
+                        label="Download Historical Data CSV",
+                        data=csv_hist,
+                        file_name=f"{symbol}_historical.csv",
+                        mime="text/csv"
+                    )
+
             except Exception as e:
                 st.error(f"Error displaying data: {str(e)}")
 else:
