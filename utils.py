@@ -142,51 +142,58 @@ def prepare_summary_data(info: dict) -> pd.DataFrame:
     df['Value'] = df['Value'].apply(lambda x: format_currency(x) if isinstance(x, (int, float)) else 'N/A')
     return df
 
-def generate_portfolio_snapshot(symbols: List[str]) -> Tuple[pd.DataFrame, Dict, str]:
+def generate_portfolio_snapshot(symbols: List[str]) -> Tuple[Optional[pd.DataFrame], Dict, str]:
     """Generate a snapshot of the portfolio performance."""
     try:
         portfolio_data = []
         total_value = 0
         total_change = 0
+        invalid_symbols = []
 
         for symbol in symbols:
-            # Convert to upper case and append .NS if not present
-            symbol = symbol.strip().upper()
-            if not (symbol.endswith('.NS') or symbol.endswith('.BO')):
-                symbol = f"{symbol}.NS"
+            try:
+                # Convert to upper case and append .NS if not present
+                symbol = symbol.strip().upper()
+                if not (symbol.endswith('.NS') or symbol.endswith('.BO')):
+                    symbol = f"{symbol}.NS"
 
-            stock = yf.Ticker(symbol)
-            info = stock.info
+                stock = yf.Ticker(symbol)
+                info = stock.info
 
-            if 'regularMarketPrice' not in info:
+                if not info or 'regularMarketPrice' not in info:
+                    invalid_symbols.append(symbol.replace('.NS', ''))
+                    continue
+
+                current_price = info.get('regularMarketPrice', 0)
+                prev_close = info.get('regularMarketPreviousClose', 0)
+                change = current_price - prev_close
+                change_percent = (change / prev_close * 100) if prev_close else 0
+
+                # Get 52-week data
+                week_high = info.get('fiftyTwoWeekHigh', 0)
+                week_low = info.get('fiftyTwoWeekLow', 0)
+
+                # Add to total value (assuming equal weights for simplicity)
+                total_value += current_price
+                total_change += change
+
+                portfolio_data.append({
+                    'Symbol': symbol.replace('.NS', ''),
+                    'Current Price': current_price,
+                    'Change': change,
+                    'Change %': change_percent,
+                    '52W High': week_high,
+                    '52W Low': week_low,
+                    'Distance from 52W High %': ((week_high - current_price) / week_high * 100) if week_high else 0,
+                    'Distance from 52W Low %': ((current_price - week_low) / week_low * 100) if week_low else 0
+                })
+            except Exception as e:
+                invalid_symbols.append(symbol.replace('.NS', ''))
                 continue
 
-            current_price = info.get('regularMarketPrice', 0)
-            prev_close = info.get('regularMarketPreviousClose', 0)
-            change = current_price - prev_close
-            change_percent = (change / prev_close * 100) if prev_close else 0
-
-            # Get 52-week data
-            week_high = info.get('fiftyTwoWeekHigh', 0)
-            week_low = info.get('fiftyTwoWeekLow', 0)
-
-            # Add to total value (assuming equal weights for simplicity)
-            total_value += current_price
-            total_change += change
-
-            portfolio_data.append({
-                'Symbol': symbol.replace('.NS', ''),
-                'Current Price': current_price,
-                'Change': change,
-                'Change %': change_percent,
-                '52W High': week_high,
-                '52W Low': week_low,
-                'Distance from 52W High %': ((week_high - current_price) / week_high * 100) if week_high else 0,
-                'Distance from 52W Low %': ((current_price - week_low) / week_low * 100) if week_low else 0
-            })
-
         if not portfolio_data:
-            return None, None, "No valid stocks in portfolio"
+            invalid_symbols_str = ", ".join(invalid_symbols)
+            return None, None, f"No valid stocks found in portfolio. Invalid symbols: {invalid_symbols_str}"
 
         # Create DataFrame
         df = pd.DataFrame(portfolio_data)
@@ -202,11 +209,15 @@ def generate_portfolio_snapshot(symbols: List[str]) -> Tuple[pd.DataFrame, Dict,
         summary = {
             'Total Value': total_value,
             'Total Change': total_change,
-            'Total Change %': (total_change / (total_value - total_change) * 100) if (total_value - total_change) !=0 else 0,
+            'Total Change %': (total_change / (total_value - total_change) * 100) if (total_value - total_change) != 0 else 0,
             'Best Performer': df.iloc[df['Change %'].str.rstrip('%').astype(float).idxmax()]['Symbol'],
             'Worst Performer': df.iloc[df['Change %'].str.rstrip('%').astype(float).idxmin()]['Symbol'],
             'Timestamp': datetime.datetime.now(pytz.timezone('Asia/Kolkata')).strftime('%Y-%m-%d %H:%M:%S IST')
         }
+
+        # Add invalid symbols to summary if any
+        if invalid_symbols:
+            summary['Invalid Symbols'] = invalid_symbols
 
         return df, summary, "success"
 

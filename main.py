@@ -326,6 +326,10 @@ if st.button("Generate Portfolio Snapshot", key="generate_snapshot"):
                 # Display timestamp
                 st.caption(f"Last Updated: {summary['Timestamp']}")
 
+                # Display invalid symbols if any
+                if 'Invalid Symbols' in summary and summary['Invalid Symbols']:
+                    st.warning(f"Unable to fetch data for the following symbols: {', '.join(summary['Invalid Symbols'])}")
+
                 # Display portfolio table
                 st.subheader("Portfolio Details")
                 st.dataframe(
