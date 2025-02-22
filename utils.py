@@ -113,6 +113,9 @@ def get_stock_data(symbol: str) -> Tuple[Optional[pd.DataFrame], Optional[dict],
         # RSI
         hist['RSI'] = calculate_rsi(hist['Close'])
 
+        # Generate sparkline data
+        info['sparkline_data'] = generate_sparkline_data(hist)
+
         return hist, info, "success"
 
     except Exception as e:
@@ -142,6 +145,23 @@ def prepare_summary_data(info: dict) -> pd.DataFrame:
     df['Value'] = df['Value'].apply(lambda x: format_currency(x) if isinstance(x, (int, float)) else 'N/A')
     return df
 
+def generate_sparkline_data(hist_data: pd.DataFrame) -> list:
+    """Generate normalized data for sparkline visualization."""
+    if hist_data is None or hist_data.empty:
+        return []
+
+    # Get last 30 days of closing prices
+    close_prices = hist_data['Close'].tail(30)
+
+    # Normalize to 0-1 range for consistent visualization
+    if len(close_prices) > 0:
+        min_price = close_prices.min()
+        max_price = close_prices.max()
+        if max_price != min_price:
+            normalized = (close_prices - min_price) / (max_price - min_price)
+            return normalized.tolist()
+    return []
+
 def generate_portfolio_snapshot(symbols: List[str]) -> Tuple[Optional[pd.DataFrame], Dict, str]:
     """Generate a snapshot of the portfolio performance."""
     try:
@@ -159,6 +179,7 @@ def generate_portfolio_snapshot(symbols: List[str]) -> Tuple[Optional[pd.DataFra
 
                 stock = yf.Ticker(symbol)
                 info = stock.info
+                hist = stock.history(period="1y")
 
                 if not info or 'regularMarketPrice' not in info:
                     invalid_symbols.append(symbol.replace('.NS', ''))
@@ -173,12 +194,16 @@ def generate_portfolio_snapshot(symbols: List[str]) -> Tuple[Optional[pd.DataFra
                 week_high = info.get('fiftyTwoWeekHigh', 0)
                 week_low = info.get('fiftyTwoWeekLow', 0)
 
+                # Generate sparkline data
+                sparkline_data = generate_sparkline_data(hist)
+
                 # Add to total value (assuming equal weights for simplicity)
                 total_value += current_price
                 total_change += change
 
                 portfolio_data.append({
                     'Symbol': symbol.replace('.NS', ''),
+                    'Trend': sparkline_data,
                     'Current Price': current_price,
                     'Change': change,
                     'Change %': change_percent,
