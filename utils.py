@@ -3,7 +3,7 @@ import pytz
 import pandas as pd
 import numpy as np
 import yfinance as yf
-from typing import Tuple, Optional, Dict
+from typing import Tuple, Optional, Dict, List
 
 def is_indian_market_open() -> Tuple[bool, str]:
     """Check if Indian market is open and return next opening time if closed."""
@@ -140,3 +140,73 @@ def prepare_summary_data(info: dict) -> pd.DataFrame:
     df = pd.DataFrame(list(metrics.items()), columns=['Metric', 'Value'])
     df['Value'] = df['Value'].apply(lambda x: format_currency(x) if isinstance(x, (int, float)) else 'N/A')
     return df
+
+def generate_portfolio_snapshot(symbols: List[str]) -> Tuple[pd.DataFrame, Dict, str]:
+    """Generate a snapshot of the portfolio performance."""
+    try:
+        portfolio_data = []
+        total_value = 0
+        total_change = 0
+
+        for symbol in symbols:
+            # Append .NS if not present
+            if not (symbol.endswith('.NS') or symbol.endswith('.BO')):
+                symbol = f"{symbol}.NS"
+
+            stock = yf.Ticker(symbol)
+            info = stock.info
+
+            if 'regularMarketPrice' not in info:
+                continue
+
+            current_price = info.get('regularMarketPrice', 0)
+            prev_close = info.get('regularMarketPreviousClose', 0)
+            change = current_price - prev_close
+            change_percent = (change / prev_close * 100) if prev_close else 0
+
+            # Get 52-week data
+            week_high = info.get('fiftyTwoWeekHigh', 0)
+            week_low = info.get('fiftyTwoWeekLow', 0)
+
+            # Add to total value (assuming equal weights for simplicity)
+            total_value += current_price
+            total_change += change
+
+            portfolio_data.append({
+                'Symbol': symbol.replace('.NS', ''),
+                'Current Price': current_price,
+                'Change': change,
+                'Change %': change_percent,
+                '52W High': week_high,
+                '52W Low': week_low,
+                'Distance from 52W High %': ((week_high - current_price) / week_high * 100) if week_high else 0,
+                'Distance from 52W Low %': ((current_price - week_low) / week_low * 100) if week_low else 0
+            })
+
+        if not portfolio_data:
+            return None, None, "No valid stocks in portfolio"
+
+        # Create DataFrame
+        df = pd.DataFrame(portfolio_data)
+
+        # Format the DataFrame
+        for col in ['Current Price', 'Change', '52W High', '52W Low']:
+            df[col] = df[col].apply(format_currency)
+
+        for col in ['Change %', 'Distance from 52W High %', 'Distance from 52W Low %']:
+            df[col] = df[col].apply(lambda x: f"{x:.2f}%")
+
+        # Calculate portfolio summary
+        summary = {
+            'Total Value': total_value,
+            'Total Change': total_change,
+            'Total Change %': (total_change / (total_value - total_change) * 100) if (total_value - total_change) !=0 else 0,
+            'Best Performer': df.iloc[df['Change %'].str.rstrip('%').astype(float).idxmax()]['Symbol'],
+            'Worst Performer': df.iloc[df['Change %'].str.rstrip('%').astype(float).idxmin()]['Symbol'],
+            'Timestamp': datetime.datetime.now(pytz.timezone('Asia/Kolkata')).strftime('%Y-%m-%d %H:%M:%S IST')
+        }
+
+        return df, summary, "success"
+
+    except Exception as e:
+        return None, None, f"Error generating portfolio snapshot: {str(e)}"

@@ -1,7 +1,14 @@
 import streamlit as st
 import plotly.graph_objects as go
-from utils import is_indian_market_open, get_stock_data, prepare_summary_data, get_nse_indices
+from utils import (
+    is_indian_market_open, 
+    get_stock_data, 
+    prepare_summary_data, 
+    get_nse_indices,
+    generate_portfolio_snapshot
+)
 import pandas as pd
+import datetime
 
 # Page config
 st.set_page_config(
@@ -265,6 +272,81 @@ if symbol:
                 st.error(f"Error displaying data: {str(e)}")
 else:
     st.info("Please enter a stock symbol to view data")
+
+
+# Portfolio Snapshot Section
+st.subheader("📊 Portfolio Snapshot Generator")
+st.markdown("""
+    Generate a quick snapshot of your portfolio performance.
+    Enter stock symbols separated by commas (e.g., TCS, INFY, RELIANCE)
+""")
+
+portfolio_input = st.text_input(
+    "Enter Portfolio Symbols:",
+    help="Enter multiple stock symbols separated by commas",
+    key="portfolio_input"
+).upper()
+
+if st.button("Generate Portfolio Snapshot", key="generate_snapshot"):
+    if not portfolio_input:
+        st.warning("Please enter at least one stock symbol")
+    else:
+        with st.spinner("Generating portfolio snapshot..."):
+            # Process symbols
+            symbols = [sym.strip() for sym in portfolio_input.split(',')]
+
+            # Generate snapshot
+            portfolio_df, summary, message = generate_portfolio_snapshot(symbols)
+
+            if message != "success":
+                st.error(message)
+            else:
+                # Display summary metrics
+                st.subheader("Portfolio Summary")
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    st.metric(
+                        "Total Portfolio Value",
+                        f"₹{summary['Total Value']:,.2f}",
+                        f"{summary['Total Change']:,.2f} ({summary['Total Change %']:.2f}%)",
+                        delta_color="normal" if summary['Total Change'] >= 0 else "inverse"
+                    )
+
+                with col2:
+                    st.metric("Best Performer", summary['Best Performer'])
+
+                with col3:
+                    st.metric("Worst Performer", summary['Worst Performer'])
+
+                # Display timestamp
+                st.caption(f"Last Updated: {summary['Timestamp']}")
+
+                # Display portfolio table
+                st.subheader("Portfolio Details")
+                st.dataframe(
+                    portfolio_df,
+                    column_config={
+                        "Symbol": st.column_config.TextColumn("Symbol", width="medium"),
+                        "Current Price": st.column_config.TextColumn("Current Price", width="medium"),
+                        "Change": st.column_config.TextColumn("Change", width="medium"),
+                        "Change %": st.column_config.TextColumn("Change %", width="medium"),
+                        "52W High": st.column_config.TextColumn("52W High", width="medium"),
+                        "52W Low": st.column_config.TextColumn("52W Low", width="medium"),
+                        "Distance from 52W High %": st.column_config.TextColumn("Distance from 52W High", width="medium"),
+                        "Distance from 52W Low %": st.column_config.TextColumn("Distance from 52W Low", width="medium")
+                    },
+                    hide_index=True
+                )
+
+                # Download button for portfolio data
+                csv = portfolio_df.to_csv(index=False)
+                st.download_button(
+                    label="Download Portfolio Snapshot",
+                    data=csv,
+                    file_name=f"portfolio_snapshot_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                    mime="text/csv"
+                )
 
 # Footer
 st.markdown("""
