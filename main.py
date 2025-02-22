@@ -1,6 +1,5 @@
 import streamlit as st
 import plotly.graph_objects as go
-import plotly.express as px
 from utils import (
     is_indian_market_open, 
     get_stock_data, 
@@ -148,35 +147,7 @@ if symbol:
             try:
                 # Display basic info
                 company_name = info.get('longName', symbol)
-
-                # Create columns for header section
-                col1, col2 = st.columns([3, 1])
-
-                with col1:
-                    st.subheader(f"{company_name} ({symbol.upper()})")
-
-                with col2:
-                    # Display sparkline in the header
-                    if 'sparkline_data' in info and info['sparkline_data']:
-                        fig = go.Figure()
-                        fig.add_trace(go.Scatter(
-                            y=info['sparkline_data'],
-                            mode='lines',
-                            line=dict(
-                                color='blue',
-                                width=1
-                            ),
-                            showlegend=False
-                        ))
-                        fig.update_layout(
-                            margin=dict(l=0, r=0, t=0, b=0),
-                            height=50,
-                            paper_bgcolor='rgba(0,0,0,0)',
-                            plot_bgcolor='rgba(0,0,0,0)',
-                            xaxis=dict(showgrid=False, zeroline=False, visible=False),
-                            yaxis=dict(showgrid=False, zeroline=False, visible=False)
-                        )
-                        st.plotly_chart(fig, use_container_width=True)
+                st.subheader(f"{company_name} ({symbol.upper()})")
 
                 # Display summary table
                 st.subheader("Stock Summary")
@@ -359,39 +330,12 @@ if st.button("Generate Portfolio Snapshot", key="generate_snapshot"):
                 if 'Invalid Symbols' in summary and summary['Invalid Symbols']:
                     st.warning(f"Unable to fetch data for the following symbols: {', '.join(summary['Invalid Symbols'])}")
 
-                # Display portfolio table with sparklines
+                # Display portfolio table
                 st.subheader("Portfolio Details")
-
-                # Create sparkline plots for each stock
-                for index, row in portfolio_df.iterrows():
-                    if row['Trend']:
-                        fig = go.Figure()
-                        fig.add_trace(go.Scatter(
-                            y=row['Trend'],
-                            mode='lines',
-                            line=dict(
-                                color='blue' if float(row['Change %'].rstrip('%')) >= 0 else 'red',
-                                width=1
-                            ),
-                            showlegend=False
-                        ))
-                        fig.update_layout(
-                            margin=dict(l=0, r=0, t=0, b=0),
-                            height=30,
-                            width=100,
-                            paper_bgcolor='rgba(0,0,0,0)',
-                            plot_bgcolor='rgba(0,0,0,0)',
-                            xaxis=dict(showgrid=False, zeroline=False, visible=False),
-                            yaxis=dict(showgrid=False, zeroline=False, visible=False)
-                        )
-                        portfolio_df.at[index, 'Trend'] = fig
-
-                # Display the dataframe with sparklines
                 st.dataframe(
                     portfolio_df,
                     column_config={
                         "Symbol": st.column_config.TextColumn("Symbol", width="medium"),
-                        "Trend": st.column_config.PlotColumn("Trend", width="small"),
                         "Current Price": st.column_config.TextColumn("Current Price", width="medium"),
                         "Change": st.column_config.TextColumn("Change", width="medium"),
                         "Change %": st.column_config.TextColumn("Change %", width="medium"),
@@ -404,7 +348,7 @@ if st.button("Generate Portfolio Snapshot", key="generate_snapshot"):
                 )
 
                 # Download button for portfolio data
-                csv = portfolio_df.drop('Trend', axis=1).to_csv(index=False)
+                csv = portfolio_df.to_csv(index=False)
                 st.download_button(
                     label="Download Portfolio Snapshot",
                     data=csv,
