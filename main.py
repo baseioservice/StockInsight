@@ -1,6 +1,6 @@
 import streamlit as st
 import plotly.graph_objects as go
-from utils import is_indian_market_open, get_stock_data, prepare_summary_data
+from utils import is_indian_market_open, get_stock_data, prepare_summary_data, get_nse_indices
 import pandas as pd
 
 # Page config
@@ -35,7 +35,95 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# NSE Indices Section
+st.subheader("📊 NSE Indices")
+indices_data = get_nse_indices()
+
+# Create two columns for Nifty 50 and Bank Nifty
+nifty_col, banknifty_col = st.columns(2)
+
+# Display Nifty 50
+with nifty_col:
+    hist_data, info, message = indices_data['NIFTY 50']
+    if message == "success":
+        st.subheader("NIFTY 50")
+        current_price = info.get('regularMarketPrice', 'N/A')
+        prev_close = info.get('regularMarketPreviousClose', 'N/A')
+        change = current_price - prev_close if isinstance(current_price, (int, float)) and isinstance(prev_close, (int, float)) else 0
+        change_percent = (change / prev_close * 100) if prev_close else 0
+
+        # Display current value and change
+        st.metric(
+            "Current Value",
+            f"₹{current_price:,.2f}",
+            f"{change:,.2f} ({change_percent:.2f}%)",
+            delta_color="normal" if change >= 0 else "inverse"
+        )
+
+        # Nifty 50 Chart
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=hist_data.index,
+            y=hist_data['Close'],
+            name='NIFTY 50',
+            line=dict(color='blue', width=1)
+        ))
+
+        fig.update_layout(
+            title="NIFTY 50 Historical Trend",
+            yaxis_title="Value",
+            xaxis_title="Date",
+            template="plotly_white",
+            height=400,
+            showlegend=True
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.error(f"Error loading NIFTY 50 data: {message}")
+
+# Display Bank Nifty
+with banknifty_col:
+    hist_data, info, message = indices_data['BANK NIFTY']
+    if message == "success":
+        st.subheader("BANK NIFTY")
+        current_price = info.get('regularMarketPrice', 'N/A')
+        prev_close = info.get('regularMarketPreviousClose', 'N/A')
+        change = current_price - prev_close if isinstance(current_price, (int, float)) and isinstance(prev_close, (int, float)) else 0
+        change_percent = (change / prev_close * 100) if prev_close else 0
+
+        # Display current value and change
+        st.metric(
+            "Current Value",
+            f"₹{current_price:,.2f}",
+            f"{change:,.2f} ({change_percent:.2f}%)",
+            delta_color="normal" if change >= 0 else "inverse"
+        )
+
+        # Bank Nifty Chart
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=hist_data.index,
+            y=hist_data['Close'],
+            name='BANK NIFTY',
+            line=dict(color='green', width=1)
+        ))
+
+        fig.update_layout(
+            title="BANK NIFTY Historical Trend",
+            yaxis_title="Value",
+            xaxis_title="Date",
+            template="plotly_white",
+            height=400,
+            showlegend=True
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.error(f"Error loading BANK NIFTY data: {message}")
+
 # Stock input
+st.subheader("🔍 Stock Search")
 symbol = st.text_input("Enter Stock Symbol:", key="stock_input").upper()
 
 if symbol:

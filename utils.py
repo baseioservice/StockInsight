@@ -3,7 +3,7 @@ import pytz
 import pandas as pd
 import numpy as np
 import yfinance as yf
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Dict
 
 def is_indian_market_open() -> Tuple[bool, str]:
     """Check if Indian market is open and return next opening time if closed."""
@@ -48,6 +48,41 @@ def calculate_rsi(data: pd.Series, periods: int = 14) -> pd.Series:
     rs = gain / loss
     rsi = 100 - (100 / (1 + rs))
     return rsi
+
+def get_nse_indices() -> Dict[str, Tuple[Optional[pd.DataFrame], Optional[dict], str]]:
+    """Fetch NSE indices data (Nifty 50 and Bank Nifty)."""
+    indices = {
+        'NIFTY 50': '^NSEI',
+        'BANK NIFTY': '^NSEBANK'
+    }
+
+    result = {}
+    for index_name, symbol in indices.items():
+        try:
+            index = yf.Ticker(symbol)
+            info = index.info
+
+            if 'regularMarketPrice' not in info:
+                result[index_name] = (None, None, f"Unable to fetch {index_name} data")
+                continue
+
+            hist = index.history(period="1y")
+            if hist.empty:
+                result[index_name] = (None, None, f"No historical data available for {index_name}")
+                continue
+
+            # Calculate technical indicators
+            hist['MA20'] = hist['Close'].rolling(window=20).mean()
+            hist['MA50'] = hist['Close'].rolling(window=50).mean()
+            hist['MA200'] = hist['Close'].rolling(window=200).mean()
+            hist['RSI'] = calculate_rsi(hist['Close'])
+
+            result[index_name] = (hist, info, "success")
+
+        except Exception as e:
+            result[index_name] = (None, None, f"Error fetching {index_name} data: {str(e)}")
+
+    return result
 
 def get_stock_data(symbol: str) -> Tuple[Optional[pd.DataFrame], Optional[dict], str]:
     """Fetch stock data from Yahoo Finance."""
