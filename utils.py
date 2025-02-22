@@ -87,7 +87,8 @@ def get_nse_indices() -> Dict[str, Tuple[Optional[pd.DataFrame], Optional[dict],
 def get_stock_data(symbol: str) -> Tuple[Optional[pd.DataFrame], Optional[dict], str]:
     """Fetch stock data from Yahoo Finance."""
     try:
-        # Append .NS or .BO if not present
+        # Convert to upper case and append .NS or .BO if not present
+        symbol = symbol.upper()
         if not (symbol.endswith('.NS') or symbol.endswith('.BO')):
             symbol = f"{symbol}.NS"  # Default to NSE
 
@@ -149,7 +150,8 @@ def generate_portfolio_snapshot(symbols: List[str]) -> Tuple[pd.DataFrame, Dict,
         total_change = 0
 
         for symbol in symbols:
-            # Append .NS if not present
+            # Convert to upper case and append .NS if not present
+            symbol = symbol.strip().upper()
             if not (symbol.endswith('.NS') or symbol.endswith('.BO')):
                 symbol = f"{symbol}.NS"
 

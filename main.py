@@ -131,7 +131,11 @@ with banknifty_col:
 
 # Stock input
 st.subheader("🔍 Stock Search")
-symbol = st.text_input("Enter Stock Symbol:", key="stock_input").upper()
+symbol = st.text_input(
+    "Enter Stock Symbol:",
+    help="Enter stock symbol (e.g., 'TCS' or 'tcs'). Case-insensitive.",
+    key="stock_input"
+)
 
 if symbol:
     with st.spinner(f'Fetching data for {symbol}...'):
@@ -143,7 +147,7 @@ if symbol:
             try:
                 # Display basic info
                 company_name = info.get('longName', symbol)
-                st.subheader(f"{company_name} ({symbol})")
+                st.subheader(f"{company_name} ({symbol.upper()})")
 
                 # Display summary table
                 st.subheader("Stock Summary")
@@ -278,14 +282,14 @@ else:
 st.subheader("📊 Portfolio Snapshot Generator")
 st.markdown("""
     Generate a quick snapshot of your portfolio performance.
-    Enter stock symbols separated by commas (e.g., TCS, INFY, RELIANCE)
+    Enter stock symbols separated by commas (e.g., TCS, INFY, RELIANCE or tcs, infy, reliance). Case-insensitive.
 """)
 
 portfolio_input = st.text_input(
     "Enter Portfolio Symbols:",
-    help="Enter multiple stock symbols separated by commas",
+    help="Enter multiple stock symbols separated by commas (case-insensitive)",
     key="portfolio_input"
-).upper()
+)
 
 if st.button("Generate Portfolio Snapshot", key="generate_snapshot"):
     if not portfolio_input:
