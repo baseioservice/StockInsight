@@ -10,11 +10,15 @@ st.set_page_config(
     layout="wide"
 )
 
+# Clear any previous data from cache
+if 'last_symbol' in st.session_state:
+    del st.session_state['last_symbol']
+
 # Title and description
 st.title("📈 Indian Stock Market Tracker")
 st.markdown("""
     Track NSE and BSE stocks with real-time data and interactive charts.
-    Enter a stock symbol (e.g., 'RELIANCE' or 'TCS' for NSE, add '.BO' for BSE stocks)
+    Enter a stock symbol (e.g., 'GAIL' or 'TCS' for NSE, add '.BO' for BSE stocks)
 """)
 
 # Market status
@@ -31,7 +35,7 @@ st.markdown(
 )
 
 # Stock input
-symbol = st.text_input("Enter Stock Symbol:", value="RELIANCE").upper()
+symbol = st.text_input("Enter Stock Symbol:", "").upper()
 
 if symbol:
     with st.spinner('Fetching data...'):
@@ -40,6 +44,10 @@ if symbol:
         if message != "success":
             st.error(message)
         else:
+            # Display basic info
+            company_name = info.get('longName', symbol)
+            st.subheader(f"{company_name} ({symbol})")
+
             # Display summary table
             st.subheader("Stock Summary")
             if not is_open:
@@ -90,6 +98,8 @@ if symbol:
                 file_name=f"{symbol}_historical.csv",
                 mime="text/csv"
             )
+else:
+    st.info("Please enter a stock symbol to view data")
 
 # Footer
 st.markdown("""
