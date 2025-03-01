@@ -39,21 +39,23 @@ def is_indian_market_open() -> Tuple[bool, str]:
 
     return True, "Market is open"
 
-def calculate_rsi(data: pd.Series, periods: int = 14) -> pd.Series:
-    """Calculate Relative Strength Index."""
-    delta = data.diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=periods).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=periods).mean()
 
+def calculate_rsi(series: pd.Series, period: int = 14) -> pd.Series:
+    """Calculate Relative Strength Index (RSI) for a given series."""
+    delta = series.diff(1)
+    gain = (delta.where(delta > 0, 0)).rolling(window=period).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
+    
     rs = gain / loss
     rsi = 100 - (100 / (1 + rs))
     return rsi
 
 def get_nse_indices() -> Dict[str, Tuple[Optional[pd.DataFrame], Optional[dict], str]]:
-    """Fetch NSE indices data (Nifty 50 and Bank Nifty)."""
+    """Fetch NSE & BSE indices data (Nifty 50, Bank Nifty, and Sensex)."""
     indices = {
         'NIFTY 50': '^NSEI',
-        'BANK NIFTY': '^NSEBANK'
+        'BANK NIFTY': '^NSEBANK',
+        'SENSEX': '^BSESN'
     }
 
     result = {}
@@ -84,39 +86,199 @@ def get_nse_indices() -> Dict[str, Tuple[Optional[pd.DataFrame], Optional[dict],
 
     return result
 
-def get_stock_data(symbol: str) -> Tuple[Optional[pd.DataFrame], Optional[dict], str]:
-    """Fetch stock data from Yahoo Finance."""
+
+# def get_stock_data(symbol: str) -> Tuple[Optional[pd.DataFrame], Optional[dict], str]:
+#     """Fetch stock data from Yahoo Finance."""
+#     try:
+#         # Convert to upper case and append .NS or .BO if not present
+#         symbol = symbol.upper()
+#         if not (symbol.endswith('.NS') or symbol.endswith('.BO')):
+#             symbol = f"{symbol}.NS"  # Default to NSE
+
+#         stock = yf.Ticker(symbol)
+#         info = stock.info
+
+#         # Check if valid stock
+#         if 'regularMarketPrice' not in info:
+#             return None, None, "Invalid stock symbol"
+
+#         # Get historical data
+#         hist = stock.history(period="1y")
+#         if hist.empty:
+#             return None, None, "No historical data available"
+
+#         # Calculate technical indicators
+#         # Moving averages
+#         hist['MA20'] = hist['Close'].rolling(window=20).mean()
+#         hist['MA50'] = hist['Close'].rolling(window=50).mean()
+#         hist['MA200'] = hist['Close'].rolling(window=200).mean()
+
+#         # RSI
+#         hist['RSI'] = calculate_rsi(hist['Close'])
+
+#         return hist, info, "success"
+
+#     except Exception as e:
+#         return None, None, f"Error fetching data: {str(e)}"
+
+import yfinance as yf
+import pandas as pd
+from typing import Optional, Tuple, Dict, List
+
+def get_stock_data(symbol: str) -> Tuple[Optional[pd.DataFrame], Optional[dict], str, Optional[dict]]:
+    """Fetch stock data and provide insights with fundamentals, sentiment, and sector analysis."""
     try:
-        # Convert to upper case and append .NS or .BO if not present
         symbol = symbol.upper()
         if not (symbol.endswith('.NS') or symbol.endswith('.BO')):
-            symbol = f"{symbol}.NS"  # Default to NSE
+            symbol = f"{symbol}.NS"
 
         stock = yf.Ticker(symbol)
         info = stock.info
 
-        # Check if valid stock
         if 'regularMarketPrice' not in info:
-            return None, None, "Invalid stock symbol"
+            return None, None, "Invalid stock symbol", None
 
-        # Get historical data
         hist = stock.history(period="1y")
         if hist.empty:
-            return None, None, "No historical data available"
+            return None, None, "No historical data available", None
 
         # Calculate technical indicators
-        # Moving averages
         hist['MA20'] = hist['Close'].rolling(window=20).mean()
         hist['MA50'] = hist['Close'].rolling(window=50).mean()
         hist['MA200'] = hist['Close'].rolling(window=200).mean()
-
-        # RSI
         hist['RSI'] = calculate_rsi(hist['Close'])
 
-        return hist, info, "success"
+        # Extract key financial data
+        current_price = info.get('regularMarketPrice', 0)
+        ma50 = hist['MA50'].iloc[-1]
+        ma200 = hist['MA200'].iloc[-1]
+        rsi = hist['RSI'].iloc[-1]
+        pe_ratio = info.get('trailingPE', None)
+        eps = info.get('trailingEps', None)
+        week52_high = info.get('fiftyTwoWeekHigh', None)
+        week52_low = info.get('fiftyTwoWeekLow', None)
+        dividend_yield = info.get('dividendYield', None)
+        earnings_growth = info.get('earningsGrowth', None)
+        debt_to_equity = info.get('debtToEquity', None)
+        sector = info.get('sector', 'Unknown')
+
+
+        # Extract ROE  ROE=Net Income​ / Shareholder’s Equity
+        roe = info.get('returnOnEquity', None)  # Usually in decimal form (e.g., 0.15 = 15%)
+        if roe is not None:
+            roe = round(roe * 100, 2)  # Convert to percentage
+
+
+        # Generate pros & cons
+        pros, cons = [], []
+
+        # P/E= Stock Price​/ Earnings Per Share (EPS)
+
+        # **Technical Analysis Insights**
+        if current_price > ma50 and current_price > ma200:
+            pros.append("Stock is in an uptrend (above 50-day & 200-day MA).")
+        if 30 < rsi < 70:
+            pros.append("RSI is in a healthy range (30-70).")
+        if current_price >= week52_high * 0.95:
+            pros.append("Near 52-week high (strong momentum).")
+        if pe_ratio and pe_ratio < 20:
+            pros.append(f"Low P/E ratio ({pe_ratio:.2f}), undervalued.")
+
+        if current_price < ma50 or current_price < ma200:
+            cons.append("Stock is in a downtrend (below key moving averages).")
+        if rsi > 70:
+            cons.append("Stock is overbought (RSI > 70), possible correction ahead.")
+        if rsi < 30:
+            cons.append("Stock is oversold (RSI < 30), indicating weakness.")
+        if current_price <= week52_low * 1.05:
+            cons.append("Near 52-week low, weak momentum.")
+        if pe_ratio and pe_ratio > 50:
+            cons.append(f"High P/E ratio ({pe_ratio:.2f}), overvalued.")
+
+
+        if roe is not None:
+            if roe > 15:
+                pros.append(f"Strong Return on Equity (ROE): {roe}% - Indicates good profitability and efficient management.")
+            elif roe > 8:
+                pros.append(f"Moderate Return on Equity (ROE): {roe}% - Decent profitability, but further analysis needed.")
+            else:
+                cons.append(f"Low Return on Equity (ROE): {roe}% - Could indicate inefficiencies or weak profitability.")
+
+
+        # EPS (Earnings Per Share)
+        if eps is not None:
+            if eps > 30:
+                pros.append(f"Very strong earnings per share {eps}, indicating high profitability.")
+            elif eps > 10:
+                pros.append(f"Good EPS {eps}, suggesting a profitable company.")
+            else:
+                cons.append(f"Low EPS {eps}, company may have profitability concerns.")
+
+
+        # **Fundamental Insights**
+        if dividend_yield and dividend_yield > 0:
+            pros.append(f"Pays dividends (Yield: {dividend_yield * 100:.2f}%).")
+        else:
+            cons.append("No dividends, less passive income potential.")
+
+        # if earnings_growth and earnings_growth > 0:
+        #     pros.append(f"Positive earnings growth ({earnings_growth * 100:.2f}%).")
+        # else:
+        #     cons.append("Negative earnings growth, may indicate weaker future performance.")
+
+        # if debt_to_equity and debt_to_equity < 1:
+        #     pros.append(f"Low debt-to-equity ratio ({debt_to_equity:.2f}), financially stable.")
+        # else:
+        #     cons.append(f"High debt-to-equity ratio ({debt_to_equity:.2f}), may struggle with debt.")
+
+        # **Sector Comparison Insights**
+        industry_avg_pe = get_sector_avg_pe(sector)
+        if pe_ratio and industry_avg_pe:
+            if pe_ratio < industry_avg_pe:
+                pros.append(f"P/E ratio ({pe_ratio:.2f}) is lower than sector average ({industry_avg_pe:.2f}).")
+            else:
+                cons.append(f"P/E ratio ({pe_ratio:.2f}) is higher than sector average ({industry_avg_pe:.2f}), overvalued.")
+
+        # **News Sentiment Analysis**
+        sentiment = get_news_sentiment(symbol)
+        if sentiment == "Positive":
+            pros.append("Positive news sentiment, good market perception.")
+        elif sentiment == "Negative":
+            cons.append("Negative news sentiment, possible market concerns.")
+        else:
+            pros.append("Neutral news sentiment, no strong bias.")
+
+        insights = {"Pros": pros, "Cons": cons}
+
+        return hist, info, "success", insights
 
     except Exception as e:
-        return None, None, f"Error fetching data: {str(e)}"
+        return None, None, f"Error fetching data: {str(e)}", None
+
+# **Helper function to get sector average P/E ratio**
+def get_sector_avg_pe(sector: str) -> Optional[float]:
+    """Mock function to return average P/E ratio of a sector (replace with real data)."""
+    sector_pe_data = {
+        "Technology": 25,
+        "Finance": 15,
+        "Healthcare": 18,
+        "Consumer Goods": 22,
+        "Energy": 12
+    }
+    return sector_pe_data.get(sector, None)
+
+# **Helper function to get news sentiment analysis**
+def get_news_sentiment(symbol: str) -> str:
+    """Mock function for news sentiment analysis (replace with real API)."""
+    # In a real implementation, you can use a news API + sentiment analysis (e.g., NLP models)
+    sentiment_data = {
+        "TCS.NS": "Positive",
+        "INFY.NS": "Neutral",
+        "HDFC.NS": "Negative"
+    }
+    return sentiment_data.get(symbol, "Neutral")
+
+
 
 def format_currency(value: float) -> str:
     """Format number with Indian Rupee symbol."""
@@ -134,6 +296,8 @@ def prepare_summary_data(info: dict) -> pd.DataFrame:
         'Day Low': info.get('dayLow', None),
         '52 Week High': info.get('fiftyTwoWeekHigh', None),
         '52 Week Low': info.get('fiftyTwoWeekLow', None),
+        'Stock P/E [igone currency symbol]': info.get('trailingPE', None),
+        'EPS': info.get('trailingEps', None),
         'Market Cap': info.get('marketCap', None),
         'Volume': info.get('volume', None)
     }

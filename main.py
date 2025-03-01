@@ -43,13 +43,13 @@ st.markdown(
 )
 
 # NSE Indices Section
-st.subheader("📊 NSE Indices")
+st.subheader("📊 NSE & BSE Indices")
 indices_data = get_nse_indices()
 
-# Create two columns for Nifty 50 and Bank Nifty
-nifty_col, banknifty_col = st.columns(2)
+# Create three columns for NIFTY 50, BANK NIFTY, and SENSEX
+nifty_col, sensex_col, banknifty_col  = st.columns(3)
 
-# Display Nifty 50
+# Display NIFTY 50
 with nifty_col:
     hist_data, info, message = indices_data['NIFTY 50']
     if message == "success":
@@ -59,14 +59,12 @@ with nifty_col:
         change = current_price - prev_close if isinstance(current_price, (int, float)) and isinstance(prev_close, (int, float)) else 0
         change_percent = (change / prev_close * 100) if prev_close else 0
 
-        # Display current value and change
         st.metric(
             "Current Value",
             f"₹{current_price:,.2f}",
             f"{change:,.2f} ({change_percent:.2f}%)",
             delta_color="normal" if change >= 0 else "inverse"
         )
-
         # Nifty 50 Chart
         fig = go.Figure()
         fig.add_trace(go.Scatter(
@@ -89,6 +87,44 @@ with nifty_col:
     else:
         st.error(f"Error loading NIFTY 50 data: {message}")
 
+# Display SENSEX
+with sensex_col:
+    hist_data, info, message = indices_data['SENSEX']
+    if message == "success":
+        st.subheader("SENSEX")
+        current_price = info.get('regularMarketPrice', 'N/A')
+        prev_close = info.get('regularMarketPreviousClose', 'N/A')
+        change = current_price - prev_close if isinstance(current_price, (int, float)) and isinstance(prev_close, (int, float)) else 0
+        change_percent = (change / prev_close * 100) if prev_close else 0
+
+        st.metric(
+            "Current Value",
+            f"₹{current_price:,.2f}",
+            f"{change:,.2f} ({change_percent:.2f}%)",
+            delta_color="normal" if change >= 0 else "inverse"
+        )
+        # SENSEX Chart
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=hist_data.index,
+            y=hist_data['Close'],
+            name='SENSEX',
+            line=dict(color='red', width=1)
+        ))
+
+        fig.update_layout(
+            title="SENSEX Historical Trend",
+            yaxis_title="Value",
+            xaxis_title="Date",
+            template="plotly_white",
+            height=400,
+            showlegend=True
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.error(f"Error loading SENSEX data: {message}")
+
 # Display Bank Nifty
 with banknifty_col:
     hist_data, info, message = indices_data['BANK NIFTY']
@@ -99,14 +135,12 @@ with banknifty_col:
         change = current_price - prev_close if isinstance(current_price, (int, float)) and isinstance(prev_close, (int, float)) else 0
         change_percent = (change / prev_close * 100) if prev_close else 0
 
-        # Display current value and change
         st.metric(
             "Current Value",
             f"₹{current_price:,.2f}",
             f"{change:,.2f} ({change_percent:.2f}%)",
             delta_color="normal" if change >= 0 else "inverse"
         )
-
         # Bank Nifty Chart
         fig = go.Figure()
         fig.add_trace(go.Scatter(
@@ -129,6 +163,79 @@ with banknifty_col:
     else:
         st.error(f"Error loading BANK NIFTY data: {message}")
 
+# NIFTY 50 Historical Trends Section
+st.subheader("📈 NIFTY 50 Historical Trends")
+
+# Create a tabbed layout for different timeframes
+tab1, tab2, tab3 = st.tabs(["1 Month", "1 Year", "3 Years"])
+
+hist_data, info, message = indices_data['NIFTY 50']
+# 1 Month Chart
+with tab1:
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=hist_data.index[-30:],  # Last 30 days
+        y=hist_data['Close'][-30:],
+        name="NIFTY 50 (1M)",
+        line=dict(color='blue', width=1)
+    ))
+    
+    fig.update_layout(
+        title="NIFTY 50 - 1 Month Trend",
+        xaxis_title="Date",
+        yaxis_title="Value",
+        template="plotly_white",
+        #xaxis=dict(type="category")  # Ensures each day is plotted on the x-axis
+        xaxis=dict(
+            tickmode="array",
+            tickvals=hist_data.index[-30:],  # Ensure every date has a tick
+            tickangle=-45,  # Rotate labels for better readability
+            showgrid=True
+        ),
+        yaxis=dict(showgrid=True)  # Ensures Y-axis grid is visible
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
+
+
+# 1 Year Chart
+with tab2:
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=hist_data.index[-252:],  # Last 252 trading days (~1 year)
+        y=hist_data['Close'][-252:],
+        name="NIFTY 50 (1Y)",
+        line=dict(color='green', width=1)
+    ))
+    fig.update_layout(
+        title="NIFTY 50 - 1 Year Trend", 
+        xaxis_title="Date", 
+        yaxis_title="Value", 
+        template="plotly_white",
+        yaxis=dict(showgrid=True)  # Ensures Y-axis grid is visible
+        
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+# 3 Years Chart
+with tab3:
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=hist_data.index[-756:],  # Last 756 trading days (~3 years)
+        y=hist_data['Close'][-756:],
+        name="NIFTY 50 (3Y)",
+        line=dict(color='red', width=1)
+    ))
+    fig.update_layout(
+        title="NIFTY 50 - 3 Year Trend", 
+        xaxis_title="Date", 
+        yaxis_title="Value", 
+        template="plotly_white",
+        yaxis=dict(showgrid=True)  # Ensures Y-axis grid is visible
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+
 # Stock input
 st.subheader("🔍 Stock Search")
 symbol = st.text_input(
@@ -139,7 +246,9 @@ symbol = st.text_input(
 
 if symbol:
     with st.spinner(f'Fetching data for {symbol}...'):
-        hist_data, info, message = get_stock_data(symbol)
+        #hist_data, info, message = get_stock_data(symbol)
+        hist_data, info, message, insights = get_stock_data(symbol)
+
 
         if message != "success":
             st.error(message)
@@ -155,6 +264,26 @@ if symbol:
                     st.info("Note: Data shown is from the last market close")
                 summary_df = prepare_summary_data(info)
                 st.table(summary_df)
+
+                # Display Pros and Con
+                st.subheader("Pros & Cons")
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    st.subheader("✅ Pros")
+                    if insights["Pros"]:
+                        for pro in insights["Pros"]:
+                            st.success(f"✔ {pro}")
+                    else:
+                        st.info("No strong positive indicators found.")
+
+                with col2:
+                    st.subheader("❌ Cons")
+                    if insights["Cons"]:
+                        for con in insights["Cons"]:
+                            st.warning(f"⚠ {con}")
+                    else:
+                        st.info("No major risks identified.")
 
                 # Technical Indicators section
                 st.subheader("Technical Indicators")
