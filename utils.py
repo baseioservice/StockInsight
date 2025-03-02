@@ -32,15 +32,15 @@ def is_indian_market_open() -> Tuple[bool, str]:
     market_start = current_time.replace(hour=9, minute=15, second=0, microsecond=0)
     market_end = current_time.replace(hour=15, minute=30, second=0, microsecond=0)
 
-    # Fetch real-time holidays
-    holidays = get_nse_holidays()
+    # # Fetch real-time holidays
+    # holidays = get_nse_holidays()
     
-    # Convert holiday dates to datetime format
-    holiday_dates = [datetime.datetime.strptime(date, "%d-%b-%Y").date() for date in holidays]
+    # # Convert holiday dates to datetime format
+    # holiday_dates = [datetime.datetime.strptime(date, "%d-%b-%Y").date() for date in holidays]
 
-    # Check if today is a holiday
-    if current_time.date() in holiday_dates:
-        return False, f"Market is closed (Holiday)" # - Next Open Date Unknown"
+    # # Check if today is a holiday
+    # if current_time.date() in holiday_dates:
+    #     return False, f"Market is closed (Holiday)" # - Next Open Date Unknown"
 
     # Check if today is a weekend
     if current_time.weekday() >= 5:  # Saturday or Sunday
