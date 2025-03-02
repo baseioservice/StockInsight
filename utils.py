@@ -4,40 +4,95 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 from typing import Tuple, Optional, Dict, List
+import requests
+
+
+NSE_HOLIDAY_URL = "https://www.nseindia.com/api/holiday-master?type=trading"
+
+def get_nse_holidays() -> list:
+    """Fetch Indian market holidays from NSE."""
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
+    try:
+        response = requests.get(NSE_HOLIDAY_URL, headers=headers)
+        data = response.json()
+        holidays = [item['tradingDate'] for item in data['CM'] if item['holidayType'] == 'TRADING']
+        return holidays
+    except Exception as e:
+        print("Error fetching NSE holidays:", e)
+        return []
 
 def is_indian_market_open() -> Tuple[bool, str]:
-    """Check if Indian market is open and return next opening time if closed."""
+    """Check if the Indian market is open, considering holidays."""
     ist = pytz.timezone('Asia/Kolkata')
     current_time = datetime.datetime.now(ist)
 
     # Market hours: 9:15 AM to 3:30 PM IST, Monday to Friday
-    market_start = current_time.replace(hour=9, minute=15, second=0)
-    market_end = current_time.replace(hour=15, minute=30, second=0)
+    market_start = current_time.replace(hour=9, minute=15, second=0, microsecond=0)
+    market_end = current_time.replace(hour=15, minute=30, second=0, microsecond=0)
 
-    # Calculate next opening time
-    next_opening = None
-    if current_time.weekday() >= 5:  # Weekend
-        days_until_monday = (7 - current_time.weekday()) % 7
-        next_opening = (current_time + datetime.timedelta(days=days_until_monday)).replace(
-            hour=9, minute=15, second=0
-        )
-        return False, f"Market is closed (Weekend) - Opens on {next_opening.strftime('%A, %B %d at %I:%M %p')} IST"
+    # Fetch real-time holidays
+    holidays = get_nse_holidays()
+    
+    # Convert holiday dates to datetime format
+    holiday_dates = [datetime.datetime.strptime(date, "%d-%b-%Y").date() for date in holidays]
 
-    if current_time > market_end:
-        # After market hours, will open tomorrow
-        next_day = current_time + datetime.timedelta(days=1)
-        if next_day.weekday() >= 5:  # If tomorrow is weekend
-            days_until_monday = (7 - next_day.weekday()) % 7
-            next_opening = (next_day + datetime.timedelta(days=days_until_monday))
-        else:
-            next_opening = next_day
-        next_opening = next_opening.replace(hour=9, minute=15, second=0)
-        return False, f"Market is closed - Opens on {next_opening.strftime('%A, %B %d at %I:%M %p')} IST"
+    # Check if today is a holiday
+    if current_time.date() in holiday_dates:
+        return False, f"Market is closed (Holiday)" # - Next Open Date Unknown"
 
+    # Check if today is a weekend
+    if current_time.weekday() >= 5:  # Saturday or Sunday
+        return False, "Market is closed (Weekend) - Opens on Monday at 9:15 AM IST"
+
+    # Check if market hours
     if current_time < market_start:
         return False, f"Market is closed - Opens today at {market_start.strftime('%I:%M %p')} IST"
 
+    if current_time > market_end:
+        return False, f"Market is closed - Opens tomorrow at 9:15 AM IST"
+
     return True, "Market is open"
+
+# Example Usage
+# market_status, message = is_indian_market_open()
+# print(market_status, message)
+
+
+# def is_indian_market_open() -> Tuple[bool, str]:
+#     """Check if Indian market is open and return next opening time if closed."""
+#     ist = pytz.timezone('Asia/Kolkata')
+#     current_time = datetime.datetime.now(ist)
+
+#     # Market hours: 9:15 AM to 3:30 PM IST, Monday to Friday
+#     market_start = current_time.replace(hour=9, minute=15, second=0)
+#     market_end = current_time.replace(hour=15, minute=30, second=0)
+
+#     # Calculate next opening time
+#     next_opening = None
+#     if current_time.weekday() >= 5:  # Weekend
+#         days_until_monday = (7 - current_time.weekday()) % 7
+#         next_opening = (current_time + datetime.timedelta(days=days_until_monday)).replace(
+#             hour=9, minute=15, second=0
+#         )
+#         return False, f"Market is closed (Weekend) - Opens on {next_opening.strftime('%A, %B %d at %I:%M %p')} IST"
+
+#     if current_time > market_end:
+#         # After market hours, will open tomorrow
+#         next_day = current_time + datetime.timedelta(days=1)
+#         if next_day.weekday() >= 5:  # If tomorrow is weekend
+#             days_until_monday = (7 - next_day.weekday()) % 7
+#             next_opening = (next_day + datetime.timedelta(days=days_until_monday))
+#         else:
+#             next_opening = next_day
+#         next_opening = next_opening.replace(hour=9, minute=15, second=0)
+#         return False, f"Market is closed - Opens on {next_opening.strftime('%A, %B %d at %I:%M %p')} IST"
+
+#     if current_time < market_start:
+#         return False, f"Market is closed - Opens today at {market_start.strftime('%I:%M %p')} IST"
+
+#     return True, "Market is open"
 
 
 def calculate_rsi(series: pd.Series, period: int = 14) -> pd.Series:
