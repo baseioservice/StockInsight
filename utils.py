@@ -6,7 +6,6 @@ import yfinance as yf
 from typing import Tuple, Optional, Dict, List
 import requests
 
-
 NSE_HOLIDAY_URL = "https://www.nseindia.com/api/holiday-master?type=trading"
 
 def get_nse_holidays() -> list:
@@ -176,9 +175,7 @@ def get_nse_indices() -> Dict[str, Tuple[Optional[pd.DataFrame], Optional[dict],
 #     except Exception as e:
 #         return None, None, f"Error fetching data: {str(e)}"
 
-import yfinance as yf
-import pandas as pd
-from typing import Optional, Tuple, Dict, List
+
 
 def get_stock_data(symbol: str) -> Tuple[Optional[pd.DataFrame], Optional[dict], str, Optional[dict]]:
     """Fetch stock data and provide insights with fundamentals, sentiment, and sector analysis."""
@@ -362,6 +359,10 @@ def prepare_summary_data(info: dict) -> pd.DataFrame:
     return df
 
 def generate_portfolio_snapshot(symbols: List[str]) -> Tuple[Optional[pd.DataFrame], Dict, str]:
+
+    #Default value
+    symbols=["COAL", "GABRIEL", "GAIL", "GSPL", "HEMIPROP", "HINDUNILVR", "IRCTC", "IDBI", "IOC", "KARURVYSYA", "L&TFH", "OLAELEC", "ONGC", "MARICO", "NTPC", "PNBGILTS", "SAIL", "TATACOM", "TATAMOTORS", "TATAPOWER", "TATASTEEL", "WelspunInd", "WIPRO" ]
+
     """Generate a snapshot of the portfolio performance."""
     try:
         portfolio_data = []
