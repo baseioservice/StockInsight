@@ -19,8 +19,9 @@ def pagecontent():
     """)
 
     # Some defaults
-    symbols=["COAL", "GABRIEL", "GAIL", "GSPL", "HEMIPROP", "HINDUNILVR", "IRCTC", "IDBI", "IOC", "KARURVYSYA", "L&TFH", "OLAELEC", "ONGC", "MARICO", "NTPC", "PNBGILTS", "SAIL", "TATACOM", "TATAMOTORS", "TATAPOWER", "TATASTEEL", "WelspunInd", "WIPRO" ]
-    process_symbols(symbols)
+    symbols=["COALINDIA", "GABRIEL", "GAIL", "GSPL", "HEMIPROP", "HINDUNILVR", "IRCTC", "IDBI", "IOC", "KARURVYSYA", "LTF", "OLAELEC", "ONGC", "MARICO", "NTPC", "PNBGILTS", "SAIL", "TATACOM", "TATAMOTORS", "TATAPOWER", "TATASTEEL", "WELSPUNLIV", "WIPRO" ]
+    with st.spinner("Generating portfolio snapshot..."):
+        process_symbols(symbols)
 
     portfolio_input = st.text_input(
         "Enter Portfolio Symbols:",
