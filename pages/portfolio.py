@@ -5,6 +5,7 @@ from utils import (
 )
 import pandas as pd
 import datetime
+from datetime import datetime as dt
 
 def show():
     #st.title("Stock Insight")
@@ -19,9 +20,131 @@ def pagecontent():
     """)
 
     # Some defaults
-    symbols=["COALINDIA", "GABRIEL", "GAIL", "GSPL", "HEMIPROP", "HINDUNILVR", "IRCTC", "IDBI", "IOC", "KARURVYSYA", "LTF", "OLAELEC", "ONGC", "MARICO", "NTPC", "PNBGILTS", "SAIL", "TATACOM", "TATAMOTORS", "TATAPOWER", "TATASTEEL", "WELSPUNLIV", "WIPRO" ]
+    symbols=["COALINDIA", "GABRIEL", "GAIL", "GSPL", "HEMIPROP", "HINDUNILVR", "IRCTC", "IDBI", "IOC", "KARURVYSYA", "LTF", "OLAELEC", "ONGC", "MARICO", "NTPC", "PNBGILTS", "SAIL", "TATACOMM", "TATAMOTORS", "TATAPOWER", "TATASTEEL", "WELSPUNLIV", "WIPRO" ]
+
+    # Initialize dictionary with dummy values
+    stock_data = {
+        'COALINDIA': {
+            "avg_purchase_price": 199.14,  
+            "last_purchase_price": 202.85,  
+            "last_purchase_date": '2022-08-16' 
+        },
+        'GABRIEL': {
+            "avg_purchase_price": None,  
+            "last_purchase_price": None,  
+            "last_purchase_date": None 
+        },
+        'GAIL': {
+            "avg_purchase_price": 124.96,  
+            "last_purchase_price": 146.20,  
+            "last_purchase_date": '2022-03-23' 
+        },
+        'GSPL': {
+            "avg_purchase_price": 220.00,  
+            "last_purchase_price":220.00,
+            "last_purchase_date": '2022-09-10' 
+        },
+        'HEMIPROP': {
+           "avg_purchase_price": None,  
+           "last_purchase_price": None,
+            "last_purchase_date": None 
+        },
+        'HINDUNILVR': {
+            "avg_purchase_price": None,  
+            "last_purchase_price": None,
+            "last_purchase_date": None 
+        },
+        'IRCTC': {
+            "avg_purchase_price": 773.55,  
+            "last_purchase_price": 773.55,
+            "last_purchase_date": '2022-03-22' 
+        },
+        'IDBI': {
+           "avg_purchase_price": None,  
+           "last_purchase_price": None,
+            "last_purchase_date": None 
+        },
+        'IOC': {
+            "avg_purchase_price": None,  
+            "last_purchase_price": None,
+            "last_purchase_date": None 
+        },
+        'KARURVYSYA': {
+            "avg_purchase_price": None,  
+            "last_purchase_price": None,
+            "last_purchase_date": None 
+        },
+        'LTF': {
+            "avg_purchase_price": None,  
+            "last_purchase_price": None,
+            "last_purchase_date": None 
+        },
+        'OLAELEC': {
+           "avg_purchase_price": 61.30,  
+           "last_purchase_price": 61.30,
+            "last_purchase_date": '2025-02-20' 
+        },
+        'ONGC': {
+            "avg_purchase_price": None,  
+            "last_purchase_price": None,
+            "last_purchase_date": None 
+        },
+        'MARICO': {
+            "avg_purchase_price": None,  
+            "last_purchase_price": None,
+            "last_purchase_date": None 
+        },
+        'NTPC': {
+            "avg_purchase_price": None,
+            "last_purchase_price": None,  
+            "last_purchase_date": None 
+        },
+        'PNBGILTS': {
+           "avg_purchase_price": None,  
+           "last_purchase_price": None,
+            "last_purchase_date": None 
+        },
+        'SAIL': {
+            "avg_purchase_price": None,  
+            "last_purchase_price": None,
+            "last_purchase_date": None 
+        },
+        'TATACOMM': {
+            "avg_purchase_price": None,  
+            "last_purchase_price": None,
+            "last_purchase_date": None 
+        },
+        'TATAMOTORS': {
+            "avg_purchase_price": None,  
+            "last_purchase_price": None,
+            "last_purchase_date": None 
+        },
+        'TATASTEEL': {
+           "avg_purchase_price": None,  
+           "last_purchase_price": None,
+            "last_purchase_date": None 
+        },
+        'TATAPOWER': {
+            "avg_purchase_price": None,  
+            "last_purchase_price": None,
+            "last_purchase_date": None 
+        },
+        'WELSPUNLIV': {
+            "avg_purchase_price": None,
+            "last_purchase_price": None,  
+            "last_purchase_date": None 
+        },
+        'WIPRO': {
+            "avg_purchase_price": None,  
+            "last_purchase_price": None,
+            "last_purchase_date": None 
+        },
+        
+    }
+
+
     with st.spinner("Generating portfolio snapshot..."):
-        process_symbols(symbols)
+        process_symbols(symbols,stock_data)
 
     portfolio_input = st.text_input(
         "Enter Portfolio Symbols:",
@@ -36,7 +159,7 @@ def pagecontent():
             with st.spinner("Generating portfolio snapshot..."):
                 # Process symbols
                 symbols = [sym.strip() for sym in portfolio_input.split(',')]
-                process_symbols(symbols)
+                process_symbols(symbols,stock_data)
 
                 # # Generate snapshot
                 # portfolio_df, summary, message = generate_portfolio_snapshot(symbols)
@@ -95,13 +218,90 @@ def pagecontent():
                 #         mime="text/csv"
                 #     )
 
-def process_symbols(symbols):
+def clean_price(price):
+    # Check if the price is a string (which contains '₹' and commas)
+    if isinstance(price, str):
+        return float(price.replace("₹", "").replace(",", ""))
+    return price  # If it's already a float, just return it
+
+def color_current_price(value, average_buy):
+    # Clean both values, remove ₹ and commas, then convert to float
+    value = clean_price(value)
+    average_buy = clean_price(average_buy)
+    
+    # Compare and apply color formatting for display
+    if value < average_buy:
+        return f'<span style="color: red;">₹{value:.2f}</span>'
+    else:
+        return f'<span style="color: black;">₹{value:.2f}</span>'
+
+def calculate_gain_loss(df):
+    today = dt.today()
+
+    def compute(row):
+        last_buy_price = clean_price(row["Last Buy"])
+        current_price = clean_price(row["Current Price"])
+
+        # Check if the Last Buy Date is None or empty
+        if pd.isna(row["Last Buy Date"]) or row["Last Buy Date"] is None:
+            # Handle missing date (you can skip the row, set to a default, etc.)
+            return pd.Series([None, None, None])  # Return None for all calculations if date is missing
+
+        # If the date is valid, parse it
+        buy_date = dt.strptime(row["Last Buy Date"], "%Y-%m-%d")
+        years_held = (today - buy_date).days / 365.25  # Account for leap years
+
+        # Price difference
+        price_difference = current_price - last_buy_price
+
+        # Percentage gain/loss
+        percentage_gain = (price_difference / last_buy_price) * 100
+
+        # Avoid division by zero for annualized return
+        if years_held > 0:
+            annualized_return = ((1 + (percentage_gain / 100)) ** (1 / years_held) - 1) * 100
+        else:
+            annualized_return = percentage_gain  # If held for less than a year
+
+        return pd.Series([price_difference, percentage_gain, annualized_return])
+
+    # Apply calculation to each row
+    df[["Price Difference", "Total Gain %", "Annualized Gain %"]] = df.apply(compute, axis=1)
+    #print(df[["Price Difference", "Total Gain %", "Annualized Gain %"]])
+    return df
+
+
+def process_symbols(symbols, stock_data):
     # Generate snapshot
-    portfolio_df, summary, message = generate_portfolio_snapshot(symbols)
+    portfolio_df, summary, message = generate_portfolio_snapshot(symbols, stock_data)
 
     if message != "success":
         st.error(message)
     else:
+        portfolio_data = pd.DataFrame(portfolio_df)
+
+        # Apply calculations and get the modified DataFrame
+        df = calculate_gain_loss(portfolio_df)
+
+        # Option 1: Assign the calculated columns from df to portfolio_data
+        portfolio_data["Price Difference"] = df["Price Difference"]
+        portfolio_data["Total Gain %"] = df["Total Gain %"]
+        portfolio_data["Annualized Gain %"] = df["Annualized Gain %"]
+
+        # Apply formatting for display, separate from calculations
+        # portfolio_df["Current Price"] = portfolio_df.apply(lambda row: color_current_price(row["Current Price"], row["Last Buy"]), axis=1)
+        # portfolio_df["Current Price"] = portfolio_df["Current Price"].apply(lambda x: f'<span style="color: red;">₹{x}</span>' if x < row["Last Buy"] else f'<span style="color: black;">₹{x}</span>')
+
+        portfolio_df["Current Price"] = portfolio_df.apply(
+                lambda row: color_current_price(row["Current Price"], row["Last Buy"]), axis=1
+        )
+        
+
+        # Display DataFrame with Streamlit
+        st.markdown(
+            portfolio_df.to_html(escape=False, index=False), unsafe_allow_html=True
+        )
+
         # Display summary metrics
         st.subheader("Portfolio Summary")
         col1, col2, col3 = st.columns(3)
@@ -129,10 +329,19 @@ def process_symbols(symbols):
 
         # Display portfolio table
         st.subheader("Portfolio Details")
+        #print(portfolio_data)
         st.dataframe(
-            portfolio_df,
+            portfolio_data,
             column_config={
                 "Symbol": st.column_config.TextColumn("Symbol", width="medium"),
+                "Average Buy": st.column_config.TextColumn("Average Buy", width="medium"),
+                "Last Buy": st.column_config.TextColumn("Last Buy", width="medium"),
+                "Last Buy Date": st.column_config.TextColumn("Last Buy Date", width="medium"),
+
+                "Price Difference": st.column_config.TextColumn("Price Difference", width="medium"),
+                "Total Gain %": st.column_config.TextColumn("Total Gain %", width="medium"),
+                "Annualized Gain %": st.column_config.TextColumn("Annualized Gain %", width="medium"),
+
                 "Current Price": st.column_config.TextColumn("Current Price", width="medium"),
                 "Change": st.column_config.TextColumn("Change", width="medium"),
                 "Change %": st.column_config.TextColumn("Change %", width="medium"),

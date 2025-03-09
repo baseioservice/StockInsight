@@ -358,10 +358,8 @@ def prepare_summary_data(info: dict) -> pd.DataFrame:
     df['Value'] = df['Value'].apply(lambda x: format_currency(x) if isinstance(x, (int, float)) else 'N/A')
     return df
 
-def generate_portfolio_snapshot(symbols: List[str]) -> Tuple[Optional[pd.DataFrame], Dict, str]:
-
-    #Default value
-    # symbols=["COAL", "GABRIEL", "GAIL", "GSPL", "HEMIPROP", "HINDUNILVR", "IRCTC", "IDBI", "IOC", "KARURVYSYA", "L&TFH", "OLAELEC", "ONGC", "MARICO", "NTPC", "PNBGILTS", "SAIL", "TATACOM", "TATAMOTORS", "TATAPOWER", "TATASTEEL", "WelspunInd", "WIPRO" ]
+#def generate_portfolio_snapshot(symbols: List[str]) -> Tuple[Optional[pd.DataFrame], Dict, str]:
+def generate_portfolio_snapshot(symbols: List[str], stock_data: Dict[str, Dict]) -> Tuple[Optional[pd.DataFrame], Dict, str]:
 
     """Generate a snapshot of the portfolio performance."""
     try:
@@ -374,6 +372,7 @@ def generate_portfolio_snapshot(symbols: List[str]) -> Tuple[Optional[pd.DataFra
             try:
                 # Convert to upper case and append .NS if not present
                 symbol = symbol.strip().upper()
+                symbol_s = symbol.strip().upper()
                 if not (symbol.endswith('.NS') or symbol.endswith('.BO')):
                     symbol = f"{symbol}.NS"
 
@@ -397,8 +396,17 @@ def generate_portfolio_snapshot(symbols: List[str]) -> Tuple[Optional[pd.DataFra
                 total_value += current_price
                 total_change += change
 
+                average_buy=stock_data[symbol_s]["avg_purchase_price"]
+                last_purchase_price=stock_data[symbol_s]["last_purchase_price"]
+                last_purchase_date=stock_data[symbol_s]["last_purchase_date"]
+                
+                
+
                 portfolio_data.append({
                     'Symbol': symbol.replace('.NS', ''),
+                    'Average Buy': average_buy,
+                    'Last Buy': last_purchase_price,
+                    'Last Buy Date': last_purchase_date,
                     'Current Price': current_price,
                     'Change': change,
                     'Change %': change_percent,
