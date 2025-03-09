@@ -361,7 +361,7 @@ def prepare_summary_data(info: dict) -> pd.DataFrame:
 def generate_portfolio_snapshot(symbols: List[str]) -> Tuple[Optional[pd.DataFrame], Dict, str]:
 
     #Default value
-    symbols=["COAL", "GABRIEL", "GAIL", "GSPL", "HEMIPROP", "HINDUNILVR", "IRCTC", "IDBI", "IOC", "KARURVYSYA", "L&TFH", "OLAELEC", "ONGC", "MARICO", "NTPC", "PNBGILTS", "SAIL", "TATACOM", "TATAMOTORS", "TATAPOWER", "TATASTEEL", "WelspunInd", "WIPRO" ]
+    # symbols=["COAL", "GABRIEL", "GAIL", "GSPL", "HEMIPROP", "HINDUNILVR", "IRCTC", "IDBI", "IOC", "KARURVYSYA", "L&TFH", "OLAELEC", "ONGC", "MARICO", "NTPC", "PNBGILTS", "SAIL", "TATACOM", "TATAMOTORS", "TATAPOWER", "TATASTEEL", "WelspunInd", "WIPRO" ]
 
     """Generate a snapshot of the portfolio performance."""
     try:

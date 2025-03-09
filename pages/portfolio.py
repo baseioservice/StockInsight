@@ -18,6 +18,10 @@ def pagecontent():
         Enter stock symbols separated by commas (e.g., TCS, INFY, RELIANCE or tcs, infy, reliance). Case-insensitive.
     """)
 
+    # Some defaults
+    symbols=["COAL", "GABRIEL", "GAIL", "GSPL", "HEMIPROP", "HINDUNILVR", "IRCTC", "IDBI", "IOC", "KARURVYSYA", "L&TFH", "OLAELEC", "ONGC", "MARICO", "NTPC", "PNBGILTS", "SAIL", "TATACOM", "TATAMOTORS", "TATAPOWER", "TATASTEEL", "WelspunInd", "WIPRO" ]
+    process_symbols(symbols)
+
     portfolio_input = st.text_input(
         "Enter Portfolio Symbols:",
         help="Enter multiple stock symbols separated by commas (case-insensitive)",
