@@ -30,9 +30,9 @@ def pagecontent():
             "last_purchase_date": '2022-08-16' 
         },
         'GABRIEL': {
-            "avg_purchase_price": None,  
-            "last_purchase_price": None,  
-            "last_purchase_date": None 
+            "avg_purchase_price": 20,  
+            "last_purchase_price": 20,  
+            "last_purchase_date": '2012-07-19' 
         },
         'GAIL': {
             "avg_purchase_price": 124.96,  
@@ -44,15 +44,10 @@ def pagecontent():
             "last_purchase_price":220.00,
             "last_purchase_date": '2022-09-10' 
         },
-        'HEMIPROP': {
-           "avg_purchase_price": None,  
-           "last_purchase_price": None,
-            "last_purchase_date": None 
-        },
         'HINDUNILVR': {
-            "avg_purchase_price": None,  
-            "last_purchase_price": None,
-            "last_purchase_date": None 
+            "avg_purchase_price": 220,  
+            "last_purchase_price": 220,
+            "last_purchase_date": '2007-10-16' 
         },
         'IRCTC': {
             "avg_purchase_price": 773.55,  
@@ -60,24 +55,29 @@ def pagecontent():
             "last_purchase_date": '2022-03-22' 
         },
         'IDBI': {
-           "avg_purchase_price": None,  
-           "last_purchase_price": None,
-            "last_purchase_date": None 
+           "avg_purchase_price": 61.61,  
+           "last_purchase_price": 74,
+            "last_purchase_date": '2025-02-20' 
         },
         'IOC': {
-            "avg_purchase_price": None,  
-            "last_purchase_price": None,
-            "last_purchase_date": None 
+            "avg_purchase_price": 125.20,  
+            "last_purchase_price": 125.20,
+            "last_purchase_date": '2025-01-14' 
         },
         'KARURVYSYA': {
-            "avg_purchase_price": None,  
-            "last_purchase_price": None,
-            "last_purchase_date": None 
+            "avg_purchase_price": 72,  
+            "last_purchase_price": 94,
+            "last_purchase_date": '2022-11-10' 
+        },
+        'KFINTECH': {
+            "avg_purchase_price": 912,  
+            "last_purchase_price": 912,
+            "last_purchase_date": '2025-03-12' 
         },
         'LTF': {
-            "avg_purchase_price": None,  
-            "last_purchase_price": None,
-            "last_purchase_date": None 
+            "avg_purchase_price": 90.03,  
+            "last_purchase_price": 124.60,
+            "last_purchase_date": '2023-08-30' 
         },
         'OLAELEC': {
            "avg_purchase_price": 61.30,  
@@ -85,59 +85,55 @@ def pagecontent():
             "last_purchase_date": '2025-02-20' 
         },
         'ONGC': {
-            "avg_purchase_price": None,  
-            "last_purchase_price": None,
-            "last_purchase_date": None 
+            "avg_purchase_price": 138.16,  
+            "last_purchase_price": 138.16,
+            "last_purchase_date": '2022-08-16' 
         },
         'MARICO': {
-            "avg_purchase_price": None,  
-            "last_purchase_price": None,
-            "last_purchase_date": None 
+            "avg_purchase_price": 503.41,  
+            "last_purchase_price": 503.41,
+            "last_purchase_date": '2022-11-14' 
         },
         'NTPC': {
-            "avg_purchase_price": None,
-            "last_purchase_price": None,  
-            "last_purchase_date": None 
+            "avg_purchase_price": 159.66,
+            "last_purchase_price": 159.66,  
+            "last_purchase_date": '2022-05-12' 
         },
         'PNBGILTS': {
-           "avg_purchase_price": None,  
-           "last_purchase_price": None,
-            "last_purchase_date": None 
+           "avg_purchase_price": 60.41,  
+           "last_purchase_price": 62.90,
+            "last_purchase_date": '2023-08-31' 
         },
-        'SAIL': {
-            "avg_purchase_price": None,  
-            "last_purchase_price": None,
-            "last_purchase_date": None 
-        },
+
         'TATACOMM': {
-            "avg_purchase_price": None,  
-            "last_purchase_price": None,
-            "last_purchase_date": None 
+            "avg_purchase_price": 750,  
+            "last_purchase_price": 750,
+            "last_purchase_date": '2007-12-28' 
         },
         'TATAMOTORS': {
-            "avg_purchase_price": None,  
-            "last_purchase_price": None,
-            "last_purchase_date": None 
+            "avg_purchase_price": 434.05,  
+            "last_purchase_price": 434.05,
+            "last_purchase_date": '2022-03-22' 
         },
         'TATASTEEL': {
-           "avg_purchase_price": None,  
-           "last_purchase_price": None,
-            "last_purchase_date": None 
+           "avg_purchase_price": 106.92,  
+           "last_purchase_price": 106.92,
+            "last_purchase_date": '2022-09-07' 
         },
         'TATAPOWER': {
-            "avg_purchase_price": None,  
-            "last_purchase_price": None,
-            "last_purchase_date": None 
+            "avg_purchase_price": 247.45,  
+            "last_purchase_price": 283.80,
+            "last_purchase_date": '2022-05-12'  
         },
         'WELSPUNLIV': {
-            "avg_purchase_price": None,
-            "last_purchase_price": None,  
-            "last_purchase_date": None 
+            "avg_purchase_price": 93.91,
+            "last_purchase_price": 93.91,  
+            "last_purchase_date": '2022-04-21'  
         },
         'WIPRO': {
-            "avg_purchase_price": None,  
-            "last_purchase_price": None,
-            "last_purchase_date": None 
+            "avg_purchase_price": 234.89,  
+            "last_purchase_price": 234.89,
+            "last_purchase_date": '2022-06-09'  
         },
         
     }
