@@ -20,7 +20,7 @@ def pagecontent():
     """)
 
     # Some defaults
-    symbols=["COALINDIA", "GABRIEL", "GAIL", "GSPL", "HEMIPROP", "HINDUNILVR", "IRCTC", "IDBI", "IOC", "KARURVYSYA", "LTF", "OLAELEC", "ONGC", "MARICO", "NTPC", "PNBGILTS", "SAIL", "TATACOMM", "TATAMOTORS", "TATAPOWER", "TATASTEEL", "WELSPUNLIV", "WIPRO" ]
+    symbols=["COALINDIA", "GABRIEL", "GAIL", "GSPL", "HINDUNILVR", "IRCTC", "IDBI", "IOC", "KARURVYSYA","KFINTECH", "LTF", "ONGC", "MARICO", "NTPC", "PNBGILTS", "TATACOMM", "TATAMOTORS", "TATAPOWER", "TATASTEEL", "WELSPUNLIV", "WIPRO" ]
 
     # Initialize dictionary with dummy values
     stock_data = {
@@ -259,10 +259,13 @@ def calculate_gain_loss(df):
         else:
             annualized_return = percentage_gain  # If held for less than a year
 
-        return pd.Series([price_difference, percentage_gain, annualized_return])
+        years_held="{:.1f}".format(years_held)   # round to one decimal place
+        annualized_return="{:.2f}".format(annualized_return)   # round to 2 decimal place
+
+        return pd.Series([price_difference, percentage_gain,years_held, annualized_return])
 
     # Apply calculation to each row
-    df[["Price Difference", "Total Gain %", "Annualized Gain %"]] = df.apply(compute, axis=1)
+    df[["Price Difference", "Total Gain %","Years", "Annualized Gain %"]] = df.apply(compute, axis=1)
     #print(df[["Price Difference", "Total Gain %", "Annualized Gain %"]])
     return df
 
@@ -282,6 +285,7 @@ def process_symbols(symbols, stock_data):
         # Option 1: Assign the calculated columns from df to portfolio_data
         portfolio_data["Price Difference"] = df["Price Difference"]
         portfolio_data["Total Gain %"] = df["Total Gain %"]
+        portfolio_data["Years"] = df["Years"]
         portfolio_data["Annualized Gain %"] = df["Annualized Gain %"]
 
         # Apply formatting for display, separate from calculations
@@ -293,10 +297,10 @@ def process_symbols(symbols, stock_data):
         )
         
 
-        # Display DataFrame with Streamlit
-        st.markdown(
-            portfolio_df.to_html(escape=False, index=False), unsafe_allow_html=True
-        )
+        # # Display DataFrame with Streamlit
+        # st.markdown(
+        #     portfolio_df.to_html(escape=False, index=False), unsafe_allow_html=True
+        # )
 
         # Display summary metrics
         st.subheader("Portfolio Summary")
@@ -323,37 +327,43 @@ def process_symbols(symbols, stock_data):
         if 'Invalid Symbols' in summary and summary['Invalid Symbols']:
             st.warning(f"Unable to fetch data for the following symbols: {', '.join(summary['Invalid Symbols'])}")
 
-        # Display portfolio table
-        st.subheader("Portfolio Details")
-        #print(portfolio_data)
-        st.dataframe(
-            portfolio_data,
-            column_config={
-                "Symbol": st.column_config.TextColumn("Symbol", width="medium"),
-                "Average Buy": st.column_config.TextColumn("Average Buy", width="medium"),
-                "Last Buy": st.column_config.TextColumn("Last Buy", width="medium"),
-                "Last Buy Date": st.column_config.TextColumn("Last Buy Date", width="medium"),
+        # # Display portfolio table
+        # st.subheader("Portfolio Details")
+        # #print(portfolio_data)
+        # st.dataframe(
+        #     portfolio_data,
+        #     column_config={
+        #         "Symbol": st.column_config.TextColumn("Symbol", width="medium"),
+        #         "Average Buy": st.column_config.TextColumn("Average Buy", width="medium"),
+        #         "Last Buy": st.column_config.TextColumn("Last Buy", width="medium"),
+        #         "Last Buy Date": st.column_config.TextColumn("Last Buy Date", width="medium"),
 
-                "Price Difference": st.column_config.TextColumn("Price Difference", width="medium"),
-                "Total Gain %": st.column_config.TextColumn("Total Gain %", width="medium"),
-                "Annualized Gain %": st.column_config.TextColumn("Annualized Gain %", width="medium"),
+        #         "Price Difference": st.column_config.TextColumn("Price Difference", width="medium"),
+        #         "Total Gain %": st.column_config.TextColumn("Total Gain %", width="medium"),
+        #         "Annualized Gain %": st.column_config.TextColumn("Annualized Gain %", width="medium"),
 
-                "Current Price": st.column_config.TextColumn("Current Price", width="medium"),
-                "Change": st.column_config.TextColumn("Change", width="medium"),
-                "Change %": st.column_config.TextColumn("Change %", width="medium"),
-                "52W High": st.column_config.TextColumn("52W High", width="medium"),
-                "52W Low": st.column_config.TextColumn("52W Low", width="medium"),
-                "Distance from 52W High %": st.column_config.TextColumn("Distance from 52W High", width="medium"),
-                "Distance from 52W Low %": st.column_config.TextColumn("Distance from 52W Low", width="medium")
-            },
-            hide_index=True
+        #         "Current Price": st.column_config.TextColumn("Current Price", width="medium"),
+        #         "Change": st.column_config.TextColumn("Change", width="medium"),
+        #         "Change %": st.column_config.TextColumn("Change %", width="medium"),
+        #         "52W High": st.column_config.TextColumn("52W High", width="medium"),
+        #         "52W Low": st.column_config.TextColumn("52W Low", width="medium"),
+        #         "Distance from 52W High %": st.column_config.TextColumn("Distance from 52W High", width="medium"),
+        #         "Distance from 52W Low %": st.column_config.TextColumn("Distance from 52W Low", width="medium")
+        #     },
+        #     hide_index=True
+        # )
+
+        # # Download button for portfolio data
+        # csv = portfolio_df.to_csv(index=False)
+        # st.download_button(
+        #     label="Download Portfolio Snapshot",
+        #     data=csv,
+        #     file_name=f"portfolio_snapshot_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+        #     mime="text/csv"
+        # )
+
+        # Display DataFrame with Streamlit
+        st.markdown(
+            portfolio_df.to_html(escape=False, index=False), unsafe_allow_html=True
         )
 
-        # Download button for portfolio data
-        csv = portfolio_df.to_csv(index=False)
-        st.download_button(
-            label="Download Portfolio Snapshot",
-            data=csv,
-            file_name=f"portfolio_snapshot_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-            mime="text/csv"
-        )
