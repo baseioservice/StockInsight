@@ -70,8 +70,8 @@ def pagecontent():
             "last_purchase_date": '2022-11-10' 
         },
         'KFINTECH': {
-            "avg_purchase_price": 912,  
-            "last_purchase_price": 912,
+            "avg_purchase_price": 915.45,
+            "last_purchase_price": 915.45,
             "last_purchase_date": '2025-03-12' 
         },
         'LTF': {
