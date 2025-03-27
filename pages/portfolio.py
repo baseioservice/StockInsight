@@ -20,7 +20,7 @@ def pagecontent():
     """)
 
     # Some defaults
-    symbols=["COALINDIA", "GABRIEL", "GAIL", "GSPL", "HINDUNILVR", "IRCTC", "IDBI", "IOC", "KARURVYSYA","KFINTECH", "LTF", "ONGC", "MARICO", "NTPC", "PNBGILTS", "TATACOMM", "TATAMOTORS", "TATAPOWER", "TATASTEEL", "WELSPUNLIV", "WIPRO","HCLTECH","ITC" ]
+    symbols=["COALINDIA", "GABRIEL", "GAIL", "GSPL", "HINDUNILVR","HCLTECH", "IRCTC", "IDBI", "IOC","ITC", "KARURVYSYA","KFINTECH", "LTF", "ONGC", "MARICO", "NTPC", "PNBGILTS", "TATACOMM", "TATAMOTORS", "TATAPOWER", "TATASTEEL", "WELSPUNLIV", "WIPRO"]
 
     # Initialize dictionary with dummy values
     stock_data = {
@@ -89,11 +89,11 @@ def pagecontent():
             "last_purchase_price": 124.60,
             "last_purchase_date": '2023-08-30' 
         },
-        'OLAELEC': {
-           "avg_purchase_price": 61.30,  
-           "last_purchase_price": 61.30,
-            "last_purchase_date": '2025-02-20' 
-        },
+        # 'OLAELEC': {
+        #    "avg_purchase_price": 61.30,  
+        #    "last_purchase_price": 61.30,
+        #     "last_purchase_date": '2025-02-20' 
+        # },
         'ONGC': {
             "avg_purchase_price": 138.16,  
             "last_purchase_price": 138.16,
