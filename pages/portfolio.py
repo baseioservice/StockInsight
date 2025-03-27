@@ -89,11 +89,11 @@ def pagecontent():
             "last_purchase_price": 124.60,
             "last_purchase_date": '2023-08-30' 
         },
-        # 'OLAELEC': {
-        #    "avg_purchase_price": 61.30,  
-        #    "last_purchase_price": 61.30,
-        #     "last_purchase_date": '2025-02-20' 
-        # },
+        'OLAELEC': {
+           "avg_purchase_price": 61.30,  
+           "last_purchase_price": 61.30,
+            "last_purchase_date": '2025-02-20' 
+        },
         'ONGC': {
             "avg_purchase_price": 138.16,  
             "last_purchase_price": 138.16,
