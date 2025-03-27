@@ -50,8 +50,8 @@ def pagecontent():
             "last_purchase_date": '2007-10-16' 
         },
         'HCLTECH': {
-            "avg_purchase_price": 1630.15,
-            "last_purchase_price": 1630.15,
+            "avg_purchase_price": 1630.00,
+            "last_purchase_price": 1630.00,
             "last_purchase_date": '2025-03-27' 
         },
         'IRCTC': {
@@ -70,8 +70,8 @@ def pagecontent():
             "last_purchase_date": '2025-01-14' 
         },
         'ITC': {
-            "avg_purchase_price": 409.45,
-            "last_purchase_price": 409.45,
+            "avg_purchase_price": 408.00,
+            "last_purchase_price": 408.00,
             "last_purchase_date": '2025-03-27' 
         },
         'KARURVYSYA': {
