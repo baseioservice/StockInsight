@@ -20,7 +20,7 @@ def pagecontent():
     """)
 
     # Some defaults
-    symbols=["COALINDIA", "GABRIEL", "GAIL", "GSPL", "HINDUNILVR", "IRCTC", "IDBI", "IOC", "KARURVYSYA","KFINTECH", "LTF", "ONGC", "MARICO", "NTPC", "PNBGILTS", "TATACOMM", "TATAMOTORS", "TATAPOWER", "TATASTEEL", "WELSPUNLIV", "WIPRO" ]
+    symbols=["COALINDIA", "GABRIEL", "GAIL", "GSPL", "HINDUNILVR", "IRCTC", "IDBI", "IOC", "KARURVYSYA","KFINTECH", "LTF", "ONGC", "MARICO", "NTPC", "PNBGILTS", "TATACOMM", "TATAMOTORS", "TATAPOWER", "TATASTEEL", "WELSPUNLIV", "WIPRO","HCLTECH","ITC" ]
 
     # Initialize dictionary with dummy values
     stock_data = {
