@@ -20,7 +20,7 @@ def pagecontent():
     """)
 
     # Some defaults
-    symbols=["COALINDIA", "GABRIEL", "GAIL", "GSPL", "HINDUNILVR","HCLTECH", "IRCTC", "IDBI", "IOC","ITC", "KARURVYSYA","KFINTECH", "LTF", "ONGC", "MARICO", "NTPC", "PNBGILTS", "TATACOMM", "TATAMOTORS", "TATAPOWER", "TATASTEEL", "WELSPUNLIV", "WIPRO"]
+    symbols=["COALINDIA", "GABRIEL", "GAIL", "GSPL", "HINDUNILVR","HCLTECH", "IRCTC", "IDBI", "IOC","ITC", "KARURVYSYA","KFINTECH", "LTF", "ONGC", "MARICO", "NTPC", "PNBGILTS","SBIN","SOUTHBANK","TATACOMM", "TATAMOTORS", "TATAPOWER", "TATASTEEL", "WELSPUNLIV", "WIPRO"]
 
     # Initialize dictionary with dummy values
     stock_data = {
@@ -114,7 +114,16 @@ def pagecontent():
            "last_purchase_price": 62.90,
             "last_purchase_date": '2023-08-31' 
         },
-
+        'SBIN': {
+           "avg_purchase_price": 766.74,  
+           "last_purchase_price": 766.74,
+            "last_purchase_date": '2024-06-04' 
+        },
+        'SOUTHBANK': {
+           "avg_purchase_price": 25.92,  
+           "last_purchase_price": 24.54,
+            "last_purchase_date": '2024-10-03' 
+        },
         'TATACOMM': {
             "avg_purchase_price": 750,  
             "last_purchase_price": 750,
