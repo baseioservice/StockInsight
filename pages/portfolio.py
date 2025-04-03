@@ -50,9 +50,9 @@ def pagecontent():
             "last_purchase_date": '2007-10-16' 
         },
         'HCLTECH': {
-            "avg_purchase_price": 1630.00,
-            "last_purchase_price": 1630.00,
-            "last_purchase_date": '2025-03-27' 
+            "avg_purchase_price": 1552.50,
+            "last_purchase_price": 1475.00,
+            "last_purchase_date": '2025-04-03' 
         },
         'IRCTC': {
             "avg_purchase_price": 773.55,  
