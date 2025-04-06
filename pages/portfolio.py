@@ -20,7 +20,7 @@ def pagecontent():
     """)
 
     # Some defaults
-    symbols=["COALINDIA", "GABRIEL", "GAIL", "GSPL", "HINDUNILVR","HCLTECH", "IRCTC", "IDBI", "IOC","ITC", "KARURVYSYA","KFINTECH", "LTF", "ONGC", "MARICO", "NTPC", "PNBGILTS","SBIN","SOUTHBANK","TATACOMM", "TATAMOTORS", "TATAPOWER", "TATASTEEL", "WELSPUNLIV", "WIPRO"]
+    symbols=["COALINDIA", "GABRIEL", "GAIL", "GSPL", "HINDUNILVR","HCLTECH", "IRCTC", "IDBI", "IOC","ITC", "KARURVYSYA","KFINTECH", "LTF", "ONGC", "MARICO","NIFTYBEES","NTPC", "PNBGILTS","SBIN","SOUTHBANK","TATACOMM", "TATAMOTORS", "TATAPOWER", "TATASTEEL", "WELSPUNLIV", "WIPRO"]
 
     # Initialize dictionary with dummy values
     stock_data = {
@@ -89,7 +89,23 @@ def pagecontent():
             "last_purchase_price": 124.60,
             "last_purchase_date": '2023-08-30' 
         },
-        # 'OLAELEC': {
+       
+        'MARICO': {
+            "avg_purchase_price": 503.41,  
+            "last_purchase_price": 503.41,
+            "last_purchase_date": '2022-11-14' 
+        },
+        'NIFTYBEES': {
+            "avg_purchase_price": 252.75,
+            "last_purchase_price": 284.24,  
+            "last_purchase_date": '2024-10-03' 
+        },
+        'NTPC': {
+            "avg_purchase_price": 159.66,
+            "last_purchase_price": 159.66,  
+            "last_purchase_date": '2022-05-12' 
+        },
+         # 'OLAELEC': {
         #    "avg_purchase_price": 61.30,  
         #    "last_purchase_price": 61.30,
         #     "last_purchase_date": '2025-02-20' 
@@ -98,16 +114,6 @@ def pagecontent():
             "avg_purchase_price": 138.16,  
             "last_purchase_price": 138.16,
             "last_purchase_date": '2022-08-16' 
-        },
-        'MARICO': {
-            "avg_purchase_price": 503.41,  
-            "last_purchase_price": 503.41,
-            "last_purchase_date": '2022-11-14' 
-        },
-        'NTPC': {
-            "avg_purchase_price": 159.66,
-            "last_purchase_price": 159.66,  
-            "last_purchase_date": '2022-05-12' 
         },
         'PNBGILTS': {
            "avg_purchase_price": 60.41,  
