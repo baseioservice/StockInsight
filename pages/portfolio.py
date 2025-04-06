@@ -277,6 +277,7 @@ def calculate_gain_loss(df):
 
         # Percentage gain/loss
         percentage_gain = (price_difference / last_buy_price) * 100
+        percentage_gain ="{:.2f}".format(percentage_gain)   # round to 2 decimal place
 
         # Avoid division by zero for annualized return
         if years_held > 0:
