@@ -131,8 +131,8 @@ def pagecontent():
             "last_purchase_date": '2024-10-03' 
         },
         'TATACOMM': {
-            "avg_purchase_price": 750,  
-            "last_purchase_price": 750,
+            "avg_purchase_price": 450,  
+            "last_purchase_price": 450,
             "last_purchase_date": '2007-12-28' 
         },
         'TATAMOTORS': {
@@ -245,13 +245,16 @@ def clean_price(price):
         return float(price.replace("₹", "").replace(",", ""))
     return price  # If it's already a float, just return it
 
-def color_current_price(value, average_buy):
+def color_current_price(value,average_buy, last_buy):
     # Clean both values, remove ₹ and commas, then convert to float
     value = clean_price(value)
     average_buy = clean_price(average_buy)
+    last_buy = clean_price(last_buy)
     
     # Compare and apply color formatting for display
     if value < average_buy:
+        return f'<span style="color: red;">₹{value:.2f}</span>'
+    elif value < last_buy:
         return f'<span style="color: red;">₹{value:.2f}</span>'
     else:
         return f'<span style="color: black;">₹{value:.2f}</span>'
@@ -320,7 +323,7 @@ def process_symbols(symbols, stock_data):
         # portfolio_df["Current Price"] = portfolio_df["Current Price"].apply(lambda x: f'<span style="color: red;">₹{x}</span>' if x < row["Last Buy"] else f'<span style="color: black;">₹{x}</span>')
 
         portfolio_df["Current Price"] = portfolio_df.apply(
-                lambda row: color_current_price(row["Current Price"], row["Last Buy"]), axis=1
+                lambda row: color_current_price(row["Current Price"], row["Average Buy"], row["Last Buy"]), axis=1
         )
         
 
