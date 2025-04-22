@@ -283,7 +283,7 @@ def calculate_gain_loss(df):
         
 
         # Avoid division by zero for annualized return
-        if years_held > 0:
+        if years_held >= 1:
             annualized_return = ((1 + (percentage_gain / 100)) ** (1 / years_held) - 1) * 100
         else:
             annualized_return = percentage_gain  # If held for less than a year
